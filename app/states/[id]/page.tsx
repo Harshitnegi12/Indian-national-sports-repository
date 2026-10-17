@@ -1,70 +1,67 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeft, MapPin, Building2, Users, IndianRupee, Trophy } from "lucide-react"
+import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin, PlayCircle, Trophy, Users } from "lucide-react"
+import { InsrHeader } from "@/components/insr-header"
 import { INDIA_REGIONS } from "@/lib/india-sports-data"
+import { getAthletesForRegion, getSportCategory, getSportSlug, SPORT_CATEGORIES } from "@/lib/athlete-data"
+import { getRegionStory } from "@/lib/region-stories"
 
 export function generateStaticParams() {
   return INDIA_REGIONS.map((region) => ({ id: region.id }))
+}
+
+function RegionalArtwork({ motif }: { motif: string }) {
+  if (motif === "mountains") return <svg viewBox="0 0 900 420" className="absolute inset-0 h-full w-full" aria-hidden="true" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="sky" x2="0" y2="1"><stop stopColor="#dceaf4"/><stop offset="1" stopColor="#f7f4e9"/></linearGradient></defs><rect width="900" height="420" fill="url(#sky)"/><circle cx="730" cy="90" r="42" fill="#f3c57b" opacity=".8"/><path d="M0 320 190 90l118 146 126-185 220 255 110-154 136 160v108H0Z" fill="#71889a"/><path d="m190 90 55 68-49-21-25 33-31-15Zm244-39 74 91-65-23-35 32-43-29Zm330 101 54 65-52-20-25 25-30-20Z" fill="#f7f8f5"/><path d="M0 348 230 194l155 131 182-176 333 208v63H0Z" fill="#355d68"/><path d="M0 388q160-95 295-8t255 0q150-90 350 12v28H0Z" fill="#287b75"/></svg>
+  if (motif === "fields") return <svg viewBox="0 0 900 420" className="absolute inset-0 h-full w-full" aria-hidden="true" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="fieldsky" x2="0" y2="1"><stop stopColor="#d8edf0"/><stop offset=".62" stopColor="#f8e6bd"/><stop offset="1" stopColor="#e0ba67"/></linearGradient></defs><rect width="900" height="420" fill="url(#fieldsky)"/><circle cx="732" cy="90" r="45" fill="#f3bb5c" opacity=".86"/><path d="M0 260q180-45 340 0t560-8v168H0Z" fill="#9d9f43"/><path d="M0 302q200-60 425 8t475-15v125H0Z" fill="#7e8d35"/><path d="M0 355q180-42 375 0t525-14v79H0Z" fill="#506d32"/><g fill="none" stroke="#e3c866" strokeWidth="4" opacity=".8"><path d="M40 420q145-100 260-124M220 420q115-98 260-116M470 420q95-86 210-105M670 420q74-71 190-96"/></g><g stroke="#52713b" strokeWidth="6"><path d="M140 300v-76m0 28-23-23m23 39 25-24M270 294v-90m0 34-26-26m26 43 28-28M400 310v-80m0 27-22-21m22 38 24-22"/></g></svg>
+  if (motif === "desert") return <svg viewBox="0 0 900 420" className="absolute inset-0 h-full w-full" aria-hidden="true" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="desertsky" x2="0" y2="1"><stop stopColor="#f2c985"/><stop offset="1" stopColor="#d97848"/></linearGradient></defs><rect width="900" height="420" fill="url(#desertsky)"/><circle cx="710" cy="80" r="52" fill="#ffe3a0" opacity=".85"/><path d="M0 250q160-70 335 6t565-4v168H0Z" fill="#c68142"/><path d="M0 308q205-74 410-4t490-20v136H0Z" fill="#aa613b"/><path d="M0 365q180-45 390-6t510-22v83H0Z" fill="#754b3b"/><g fill="#61423b" opacity=".85"><path d="M210 270v-88h15v88zm-18-80 25-35 25 35zm-7 0h64v8h-64zM195 205h42v10h-42zM620 285v-70h13v70zm-14-63 20-30 22 30z"/></g><path d="M0 0h900v420H0Z" fill="none" stroke="rgba(255,255,255,.3)" strokeWidth="2"/></svg>
+  if (motif === "phulkari") return <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_25%,rgba(255,205,105,.9),transparent_18%),linear-gradient(135deg,#59183e,#9e2d48_48%,#df793b)]"><div className="absolute inset-0 opacity-30" style={{backgroundImage:"repeating-linear-gradient(45deg,transparent 0 18px,rgba(255,215,145,.9) 18px 21px,transparent 21px 38px),repeating-linear-gradient(-45deg,transparent 0 18px,rgba(255,215,145,.72) 18px 21px,transparent 21px 38px)",backgroundSize:"46px 46px"}}/><svg viewBox="0 0 900 420" className="absolute inset-0 h-full w-full opacity-50" aria-hidden="true"><path d="M0 330q200-120 430-30t470-40v160H0Z" fill="#536e32"/><path d="M0 360q210-80 420-20t480-10v90H0Z" fill="#314e2f"/><path d="M620 270v-95m0 28-30-25m30 48 30-25M720 280v-82m0 25-25-21m25 42 26-22M820 273v-93m0 30-27-23m27 47 28-25" stroke="#f7d17b" strokeWidth="5" fill="none"/></svg></div>
+  return <div className="absolute inset-0 bg-gradient-to-br from-ashoka-navy via-[#34657a] to-india-green"><div className="absolute inset-0 opacity-20" style={{backgroundImage:"radial-gradient(circle at 25% 35%,white 1.5px,transparent 2px)",backgroundSize:"28px 28px"}}/><div className="absolute -right-12 -bottom-20 size-96 rounded-full border-[45px] border-white/10"/></div>
 }
 
 export default async function RegionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const region = INDIA_REGIONS.find((item) => item.id === id)
   if (!region) notFound()
+  const athletes = getAthletesForRegion(region.id)
+  const story = getRegionStory(region.id)
 
-  const stats = [
-    { label: "Sample athlete count", value: region.registeredAthletes.toLocaleString("en-IN"), icon: Users },
-    { label: "Sample academy count", value: region.registeredAcademies.toLocaleString("en-IN"), icon: Building2 },
-    { label: "Sample funding figure", value: "₹" + region.fundsDisbursedCr + " Cr", icon: IndianRupee },
-    { label: "Sample centre count", value: region.kheloIndiaCentres.toLocaleString("en-IN"), icon: Trophy },
-  ]
+  return <main className="min-h-screen bg-background/40 text-foreground">
+    <InsrHeader />
+    <section className="relative isolate min-h-[430px] overflow-hidden border-b border-border">
+      <RegionalArtwork motif={story.motif}/>
+      <div className="absolute inset-0 bg-gradient-to-r from-[#07172d]/90 via-[#07172d]/65 to-[#07172d]/10"/>
+      <div className="relative mx-auto flex min-h-[430px] max-w-7xl flex-col justify-end px-5 py-12 text-white sm:px-8 sm:py-16">
+        <Link href="/states" className="mb-auto inline-flex w-fit items-center gap-2 rounded-full border border-white/25 bg-black/15 px-3 py-2 text-xs font-semibold text-white/90 backdrop-blur hover:bg-black/30"><ArrowLeft size={14}/>All states &amp; UTs</Link>
+        <div className="max-w-3xl">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#ffd08a]">{region.type} · {region.zone} zone · Capital: {region.capital}</p>
+          <h1 className="mt-3 text-5xl font-black tracking-tight sm:text-7xl">{region.name}</h1>
+          <p className="mt-3 text-lg font-semibold text-white/90 sm:text-xl">{story.tagline}</p>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">{story.introduction}</p>
+          <div className="mt-6 flex flex-wrap gap-3"><a href="#sports" className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-ashoka-navy hover:bg-white/90">Explore sports <ArrowRight size={16}/></a><a href="#athletes" className="inline-flex items-center gap-2 rounded-lg border border-white/35 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/20"><Trophy size={16}/>Listed athletes</a></div>
+        </div>
+      </div>
+    </section>
 
-  return (
-    <main className="min-h-screen bg-background/40 text-foreground">
-      <header className="border-b border-border bg-white/65">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-ashoka-navy hover:opacity-75">
-            <ArrowLeft size={17} /> India sports directory
-          </Link>
-          <span className="text-xs text-muted-foreground">Independent public information directory</span>
-        </div>
-      </header>
-      <section className="border-b border-border bg-gradient-to-br from-white/40 via-background/40 to-emerald-50/20">
-        <div className="mx-auto max-w-6xl px-5 py-14 sm:py-20">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-saffron">{region.type} · {region.zone}</p>
-          <h1 className="text-4xl font-extrabold tracking-tight text-ashoka-navy sm:text-6xl">{region.name}</h1>
-          <p className="mt-4 flex items-center gap-2 text-muted-foreground"><MapPin size={17} /> Capital: {region.capital} <span className="px-1">·</span> Sports hub: {region.sportsHub}</p>
-          <p className="mt-5 max-w-2xl text-sm leading-7 text-muted-foreground">Explore this prototype directory for {region.name}, with sample sports, training centre, and academy information.</p>
-        </div>
-      </section>
-      <section className="mx-auto max-w-6xl px-5 py-10">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map(({ label, value, icon: Icon }) => (
-            <article key={label} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-              <Icon className="mb-5 text-india-green" size={20} />
-              <p className="text-2xl font-bold text-ashoka-navy">{value}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{label}</p>
-            </article>
-          ))}
-        </div>
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <article className="rounded-2xl border border-border bg-card p-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-saffron">Sports profile</p>
-            <h2 className="mt-2 text-xl font-bold text-ashoka-navy">Priority disciplines</h2>
-            <p className="mt-4 text-sm"><strong>Flagship:</strong> {region.flagshipSport}</p>
-            <div className="mt-4 flex flex-wrap gap-2">{region.secondarySports.map((sport) => <span key={sport} className="rounded-full bg-muted px-3 py-1.5 text-xs">{sport}</span>)}</div>
-          </article>
-          <article className="rounded-2xl border border-border bg-card p-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-india-green">Training network</p>
-            <h2 className="mt-2 text-xl font-bold text-ashoka-navy">Academies & centres</h2>
-            <ul className="mt-4 divide-y divide-border">{region.topAcademies.map((academy) => <li key={academy.name} className="py-3"><p className="font-semibold text-sm">{academy.name}</p><p className="mt-1 text-xs text-muted-foreground">{academy.city} · {academy.category}</p></li>)}</ul>
-          </article>
-        </div>
-        <p className="mt-8 rounded-xl border border-saffron/30 bg-saffron/5 p-4 text-xs leading-6 text-muted-foreground">These figures and listings are currently static starter data and have not been source-verified. They are shown as a prototype directory, not as official government records.</p>
-      </section>
-    </main>
-  )
+    <section className="mx-auto grid max-w-7xl gap-5 px-5 py-8 sm:grid-cols-3 sm:px-8">
+      <article className="rounded-2xl border border-border bg-card p-5"><p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Regional identity</p><h2 className="mt-2 text-lg font-bold text-ashoka-navy">{story.motif === "fields" ? "Fields, food & folk traditions" : story.motif === "phulkari" ? "Folk forms & phulkari craft" : story.motif === "mountains" ? "Himalayan landscape & heritage" : story.motif === "desert" ? "Desert landscapes, forts & living heritage" : region.zone + " region"}</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">{region.type} of India · {region.capital}</p></article>
+      <article className="rounded-2xl border border-border bg-card p-5"><p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Athlete profiles</p><p className="mt-2 text-3xl font-extrabold text-ashoka-navy">{athletes.length}</p><p className="mt-1 text-sm text-muted-foreground">source-linked records currently listed</p></article>
+      <article className="rounded-2xl border border-border bg-card p-5"><p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Sports directory</p><p className="mt-2 text-3xl font-extrabold text-ashoka-navy">{SPORT_CATEGORIES.length}</p><p className="mt-1 text-sm text-muted-foreground">sports with dedicated roster routes</p></article>
+    </section>
+
+    <section id="athletes" className="scroll-mt-24 border-y border-border bg-white/45"><div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+      <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-india-green">Athlete directory</p><h2 className="mt-2 text-3xl font-extrabold text-ashoka-navy">Players associated with {region.name}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Open a player to see their profile and source links. Region affiliation follows the cited record.</p></div><Link href="/athletes" className="text-sm font-semibold text-india-green hover:underline">National athlete directory <ArrowUpRight size={14} className="inline"/></Link></div>
+      {athletes.length ? <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{athletes.map((athlete) => <Link key={athlete.id} href={"/athletes/" + athlete.id} className="group rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-india-green/40 hover:shadow-md"><p className="text-xs font-semibold uppercase tracking-wider text-saffron">{athlete.sport}</p><h3 className="mt-2 text-xl font-bold text-ashoka-navy">{athlete.name}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{athlete.highlights[0]}</p><span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-india-green">Open profile <ArrowUpRight size={14}/></span></Link>)}</div> : <div className="mt-7 rounded-2xl border border-dashed border-border bg-card p-7"><p className="font-semibold text-ashoka-navy">No source-checked athlete profiles are listed for {region.name} yet.</p><p className="mt-2 text-sm leading-6 text-muted-foreground">This is a data-collection gap, not a claim that the region has no notable players.</p></div>}
+    </div></section>
+
+    <section id="sports" className="scroll-mt-24 mx-auto max-w-7xl px-5 py-12 sm:px-8"><p className="text-xs font-bold uppercase tracking-[0.18em] text-saffron">Browse by discipline</p><h2 className="mt-2 text-3xl font-extrabold text-ashoka-navy">Sports in {region.name}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Choose a sport to open its own roster. A zero count means verified entries have not yet been added.</p>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{SPORT_CATEGORIES.map((sport) => { const count = athletes.filter((athlete) => getSportCategory(athlete) === sport).length; return <Link key={sport} href={"/states/" + region.id + "/sports/" + getSportSlug(sport)} className="group flex items-center justify-between rounded-xl border border-border bg-card p-4 transition hover:border-india-green/40 hover:shadow-sm"><div><h3 className="font-semibold text-ashoka-navy">{sport}</h3><p className="mt-1 text-xs text-muted-foreground">{count} listed {count === 1 ? "profile" : "profiles"}</p></div><ArrowRight className="text-india-green transition group-hover:translate-x-1" size={17}/></Link>})}</div>
+    </section>
+
+    <section className="border-y border-border bg-muted/35"><div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 md:grid-cols-2 sm:px-8">
+      <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-india-green">Local context</p><h2 className="mt-2 text-2xl font-extrabold text-ashoka-navy">Explore {region.name}</h2><p className="mt-3 text-sm leading-7 text-muted-foreground">{story.introduction}</p><ul className="mt-4 space-y-3">{story.links.map((item) => <li key={item.url}><a href={item.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-india-green hover:underline">{item.label}<ArrowUpRight size={14}/></a></li>)}</ul></div>
+      <div className="rounded-2xl border border-border bg-card p-6"><div className="flex items-center gap-3"><PlayCircle className="text-saffron" size={22}/><div><h2 className="font-bold text-ashoka-navy">Broadcast &amp; archive footage</h2><p className="text-xs text-muted-foreground">Official public-broadcaster archive links</p></div></div><p className="mt-4 text-sm leading-6 text-muted-foreground">Browse the DD Archives catalogue and DD Sports. A specific clip appears here only after its original programme, date, and source have been verified.</p><div className="mt-5 flex flex-col gap-3"><a href="https://prasarbharati.gov.in/prasar-bharati-archives/dd-archives/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-india-green hover:underline">Prasar Bharati DD Archives<ArrowUpRight size={14}/></a><a href="https://prasarbharati.gov.in/en/dd-sports-homepage/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-india-green hover:underline">DD Sports<ArrowUpRight size={14}/></a></div></div>
+    </div></section>
+
+    <section className="mx-auto max-w-7xl px-5 py-12 sm:px-8"><div className="grid gap-4 md:grid-cols-2"><article className="rounded-2xl border border-border bg-card p-6"><div className="flex items-center gap-3"><Users className="text-india-green" size={20}/><h2 className="text-lg font-bold text-ashoka-navy">Academies &amp; coaches</h2></div><p className="mt-3 text-sm leading-6 text-muted-foreground">Use official directories to find recognised training centres, current sport offerings and coaching contacts. We do not publish unverified academy counts or coach lists.</p><div className="mt-4 flex flex-col gap-3"><a href="https://sportsauthorityofindia.nic.in/sainew/ncoe" target="_blank" rel="noreferrer" className="text-sm font-semibold text-india-green hover:underline">SAI National Centres of Excellence<ArrowUpRight className="ml-1 inline" size={14}/></a><a href="https://sportsauthorityofindia.nic.in/sai_new/public/directory" target="_blank" rel="noreferrer" className="text-sm font-semibold text-india-green hover:underline">SAI regional centres and contacts<ArrowUpRight className="ml-1 inline" size={14}/></a><a href="https://olympic.ind.in/members/" target="_blank" rel="noreferrer" className="text-sm font-semibold text-india-green hover:underline">State Olympic associations<ArrowUpRight className="ml-1 inline" size={14}/></a></div></article><article className="rounded-2xl border border-saffron/30 bg-saffron/5 p-6"><h2 className="font-bold text-ashoka-navy">What this page covers</h2><p className="mt-3 text-sm leading-6 text-muted-foreground">Regional artwork is an editorial visual. Culture notes link to public tourism or government sources. Player and medal details are shown on athlete pages with supporting records.</p><Link href="/data-notes" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-india-green hover:underline">Read data notes<ArrowRight size={14}/></Link></article></div></section>
+  </main>
 }
-
-
-

@@ -1,20 +1,21 @@
 # Indian National Sports Repository
 
-A responsive web prototype for exploring sports information, training centres, and public sports programmes across India.
+A responsive directory prototype that connects India's state and union territory pages to source-linked athlete profiles.
 
 ## Project team
 
 Developed collaboratively by Harshit and Vishakha.
 
-## Features
+## Current features
 
-- National overview landing page with a search interface.
-- Directory covering India's 28 states and 8 union territories.
-- Region pages with example sports, academy listings, and summary metrics.
-- Search and filtering for the regional directory.
-- National sports programme cards.
-- Athlete and academy portal interface for demonstrating a future sign-in flow.
-- Responsive layout with India map and tricolour visuals.
+- Overview landing page with search that opens the separate regional directory.
+- Hover/focus region menu with direct links to all 28 states and 8 union territories.
+- Separate States & UTs, Athletes, and Data notes pages.
+- Dedicated detail page for every state and union territory, with region identity, listed athletes, sports, and public directories.
+- Separate region, region-and-sport, and athlete profile routes.
+- Public source links for the athlete details currently included.
+- Responsive layout with India map and tricolour visuals, plus custom editorial artwork and cited regional context for Haryana, Punjab, Uttarakhand, and Rajasthan.
+- Athlete and academy portal preview; authentication and data storage are not connected.
 
 ## Technology
 
@@ -25,12 +26,7 @@ Developed collaboratively by Harshit and Vishakha.
 
 ## Run locally
 
-### Requirements
-
-- Node.js 20.9 or newer
-- pnpm 12.3.4 (the version recorded by this project)
-
-### Install and start
+Requirements: Node.js 20.9 or newer and pnpm 12.3.4.
 
 ```bash
 pnpm install
@@ -39,32 +35,39 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Project commands
+Other project commands:
 
 ```bash
-pnpm dev       # Start the development server
-pnpm typecheck # Check TypeScript types
-pnpm build     # Create a production build
-pnpm start     # Serve the production build
+pnpm typecheck
+pnpm build
+pnpm start
 ```
 
 ## Project layout
 
 ```text
-app/                 App Router pages, layout, and global styles
-  states/[id]/       Regional detail page
-components/          Page sections and reusable UI components
-lib/                 Regional and national programme starter data
-public/              Static images and icons
+app/
+  athletes/page.tsx     National athlete directory
+  athletes/[slug]/     Individual athlete profiles
+  data-notes/          Coverage notes and public sources
+  states/[id]/         State and union territory pages
+    sports/[sport]/    Sport rosters for a region
+components/             Landing page sections and shared UI
+lib/                    Region and athlete records
+public/                 Images and icons
 ```
 
-## Data and demo limitations
+## Data coverage and sources
 
-This repository is currently a frontend prototype. Figures, academy entries, and programme details in the starter dataset are static examples and have not been independently source-verified. They should not be treated as official, current, or complete government data.
+The athlete directory currently contains eleven source-linked profiles. It is a selective starting set, not a complete roster of athletes from each region. A region or sport with no listed profiles currently means the project has not yet added a verified record there.
 
-The athlete and academy portal is a client-side demonstration only. It does not verify identities, store accounts, or connect to an authentication service or database. Do not enter real personal information. An API, verified data sources, and production authentication would be needed before using this as a live service.
+Athlete pages link to the public sources used for their region association and listed achievements. Confirm details with those original organisations before relying on or reusing them.
 
-The project is an independent prototype and is not an official government website or service.
+The athlete list is a selective starting point, not a complete historical register of every Indian player since 1947. Empty region or sport pages mean that source-checked profiles have not yet been added there.
+
+The athlete and academy portal is a client-side demonstration only. It does not verify identities, store accounts, or connect to an authentication service or database. Do not enter real personal information.
+
+The project is independent and is not an official government website or service.
 
 ## Map artwork
 
@@ -73,5 +76,3 @@ The India flag-map SVG in `public/india-map-flag-source.svg` is sourced from [Wi
 ## License
 
 No license has been selected for this repository yet. Until a license is added, do not assume the project code is available for reuse. The map artwork has its own CC0 dedication noted above.
-
-
