@@ -95,6 +95,43 @@
   --sidebar-ring: oklch(0.24 0.075 258);
 }
 
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.17 0.025 258);
+  --foreground: oklch(0.94 0.012 250);
+  --card: oklch(0.21 0.03 258);
+  --card-foreground: oklch(0.94 0.012 250);
+  --popover: oklch(0.21 0.03 258);
+  --popover-foreground: oklch(0.94 0.012 250);
+  --primary: oklch(0.83 0.12 75);
+  --primary-foreground: oklch(0.19 0.04 258);
+  --secondary: oklch(0.26 0.03 258);
+  --secondary-foreground: oklch(0.92 0.015 250);
+  --muted: oklch(0.25 0.025 258);
+  --muted-foreground: oklch(0.72 0.025 250);
+  --accent: oklch(0.29 0.04 258);
+  --accent-foreground: oklch(0.94 0.012 250);
+  --border: oklch(0.34 0.025 258);
+  --input: oklch(0.34 0.025 258);
+  --ring: oklch(0.78 0.12 75);
+  --saffron: oklch(0.76 0.16 54);
+  --india-green: oklch(0.68 0.13 156);
+  --ashoka-navy: oklch(0.83 0.08 230);
+  --chart-1: oklch(0.76 0.16 54);
+  --chart-2: oklch(0.72 0.1 230);
+  --chart-3: oklch(0.68 0.13 156);
+  --chart-4: oklch(0.72 0.1 280);
+  --chart-5: oklch(0.8 0.14 80);
+  --sidebar: oklch(0.19 0.028 258);
+  --sidebar-foreground: oklch(0.94 0.012 250);
+  --sidebar-primary: oklch(0.83 0.12 75);
+  --sidebar-primary-foreground: oklch(0.19 0.04 258);
+  --sidebar-accent: oklch(0.25 0.025 258);
+  --sidebar-accent-foreground: oklch(0.94 0.012 250);
+  --sidebar-border: oklch(0.34 0.025 258);
+  --sidebar-ring: oklch(0.78 0.12 75);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -106,6 +143,21 @@
     @apply bg-background text-foreground font-sans;
   }
 }
+
+.dark .text-ashoka-navy {
+  color: oklch(0.83 0.08 230);
+}
+
+.dark .bg-white:not([class*="/"], [class*="opacity-"]) {
+  background-color: oklch(0.23 0.03 258);
+}
+
+.dark .bg-white\/45 { background-color: oklch(0.22 0.03 258 / 0.78); }
+.dark .bg-white\/50 { background-color: oklch(0.22 0.03 258 / 0.82); }
+.dark .bg-white\/70 { background-color: oklch(0.22 0.03 258 / 0.9); }
+.dark .from-white\/50 { --tw-gradient-from: oklch(0.23 0.03 258 / 0.7) var(--tw-gradient-from-position); }
+.dark .from-white\/70 { --tw-gradient-from: oklch(0.23 0.03 258 / 0.9) var(--tw-gradient-from-position); }
+.dark .to-emerald-50\/40 { --tw-gradient-to: oklch(0.25 0.05 160 / 0.22) var(--tw-gradient-to-position); }
 
 
 /* Fixed 3D India map watermark */

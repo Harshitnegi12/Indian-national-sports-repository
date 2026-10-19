@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { INDIA_REGIONS } from "@/lib/india-sports-data"
-import { ChevronDown, Menu, UserRound, X } from "lucide-react"
+import { ChevronDown, Menu, Moon, Sun, UserRound, X } from "lucide-react"
 
 interface InsrHeaderProps {
   onOpenLogin?: () => void
@@ -13,7 +13,24 @@ interface InsrHeaderProps {
 export function InsrHeader({ onOpenLogin }: InsrHeaderProps) {
   const [menuOpen, setMenuOpen] = React.useState(false)
   const [mobileStatesOpen, setMobileStatesOpen] = React.useState(false)
+  const [theme, setTheme] = React.useState<"light" | "dark">("light")
   const regions = [...INDIA_REGIONS].sort((a, b) => a.name.localeCompare(b.name))
+
+  React.useEffect(() => {
+    setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light")
+  }, [])
+
+  function toggleTheme() {
+    const nextTheme = theme === "dark" ? "light" : "dark"
+    document.documentElement.classList.remove("light", "dark")
+    document.documentElement.classList.add(nextTheme)
+    try {
+      localStorage.setItem("insr-theme", nextTheme)
+    } catch {
+      // Keep the current theme for this session if storage is unavailable.
+    }
+    setTheme(nextTheme)
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-md">
@@ -41,6 +58,9 @@ export function InsrHeader({ onOpenLogin }: InsrHeaderProps) {
           <Link href="/data-notes" className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/75 hover:bg-muted hover:text-ashoka-navy">Data notes</Link>
         </nav>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "day" : "night"} mode`} title={`Switch to ${theme === "dark" ? "day" : "night"} mode`}>
+            {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          </Button>
           {onOpenLogin && <Button onClick={onOpenLogin} className="hidden bg-ashoka-navy text-white hover:bg-ashoka-navy/90 sm:inline-flex"><UserRound className="mr-2 size-4" />Portal preview</Button>}
           <Button variant="outline" size="icon" className="lg:hidden" aria-label={menuOpen ? "Close menu" : "Open menu"} onClick={() => setMenuOpen((open) => !open)}>{menuOpen ? <X /> : <Menu />}</Button>
         </div>
