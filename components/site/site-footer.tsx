@@ -20,6 +20,12 @@ export function SiteFooter() {
           <nav aria-label="Footer" className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
             <Link href="/states" className="hover:text-saffron">States &amp; UTs</Link>
             <Link href="/athletes" className="hover:text-saffron">Athletes</Link>
+            <Link href="/sports" className="hover:text-saffron">Sports</Link>
+            <Link href="/rankings" className="hover:text-saffron">Rankings</Link>
+            <Link href="/women" className="hover:text-saffron">Women in Sports</Link>
+            <Link href="/para" className="hover:text-saffron">Para Champions</Link>
+            <Link href="/timeline" className="hover:text-saffron">Timeline</Link>
+            <Link href="/compare" className="hover:text-saffron">Compare</Link>
             <Link href="/data-notes" className="hover:text-saffron">Data notes &amp; sources</Link>
           </nav>
         </div>

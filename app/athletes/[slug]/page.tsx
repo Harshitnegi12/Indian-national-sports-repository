@@ -64,6 +64,24 @@ export default async function AthletePage({ params }: { params: Promise<{ slug: 
 
   return (
     <div style={{ ["--accent-region" as string]: meta?.accent }}>
+      <script
+        type="application/ld+json"
+        // Structured data so search engines understand the profile
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Person",
+            name: athlete.name,
+            description: athlete.summary,
+            image: profile?.image?.src,
+            birthDate: profile?.born,
+            birthPlace: profile?.birthplace,
+            nationality: "Indian",
+            knowsAbout: category,
+            sameAs: athlete.sources.map((s) => s.url),
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
       {/* Hero */}
       <section className="hero-surface relative overflow-hidden">
         <div className="hero-grid pointer-events-none absolute inset-0" aria-hidden="true" />
