@@ -11,6 +11,7 @@ import { SearchLauncher, SearchSuggestion } from "@/components/site/search-launc
 import { AthleteCard } from "@/components/site/athlete-card"
 import { SectionHeading } from "@/components/site/section-heading"
 import { TodayInSport } from "@/components/site/today-in-sport"
+import { T } from "@/components/site/lang"
 
 const ZONES: { zone: ZoneType; blurb: string }[] = [
   { zone: "North", blurb: "Akhadas, boxing rings and shooting ranges" },
@@ -57,18 +58,14 @@ export default function HomePage() {
               </p>
             </Reveal>
             <h1 className="mt-6 text-[2.6rem] font-bold leading-[1.02] tracking-[-0.035em] text-white sm:text-6xl lg:text-[4.2rem]">
-              <WordReveal
-                lines={[
-                  { text: "Every state." },
-                  { text: "Every sport." },
-                  { text: "Every champion.", className: "bg-gradient-to-r from-[#FF9933] via-[#FFD2A1] to-[#7EE29A] bg-clip-text text-transparent" },
-                ]}
+              <T
+                en={<WordReveal lines={[{ text: "Every state." }, { text: "Every sport." }, { text: "Every champion.", className: "bg-gradient-to-r from-[#FF9933] via-[#FFD2A1] to-[#7EE29A] bg-clip-text text-transparent" }]} />}
+                hi={<WordReveal lines={[{ text: "हर राज्य।" }, { text: "हर खेल।" }, { text: "हर चैंपियन।", className: "bg-gradient-to-r from-[#FF9933] via-[#FFD2A1] to-[#7EE29A] bg-clip-text text-transparent" }]} />}
               />
             </h1>
             <Reveal delay={0.35}>
               <p className="mt-6 max-w-xl text-lg leading-8 text-hero-muted">
-                Explore India&apos;s athletes state by state, from Olympic medallists to rising national talent.
-                Every profile links to a public source.
+                <T en={<>Explore India&apos;s athletes state by state, from Olympic medallists to rising national talent. Every profile links to a public source.</>} hi="राज्य दर राज्य भारत के खिलाड़ियों को जानिए, ओलंपिक पदक विजेताओं से लेकर उभरती राष्ट्रीय प्रतिभाओं तक। हर प्रोफ़ाइल किसी सार्वजनिक स्रोत से जुड़ी है।" />
               </p>
             </Reveal>
             <Reveal delay={0.45} className="mt-8">
@@ -83,13 +80,13 @@ export default function HomePage() {
             <Reveal delay={0.55}>
               <dl className="mt-10 grid max-w-xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-4">
                 {[
-                  [36, "States & UTs"],
-                  [ATHLETES.length, "Athletes"],
-                  [sportCounts.length, "Sports"],
-                  [medallists, "Olympic & Para medallists"],
-                ].map(([value, label]) => (
+                  [36, "States & UTs", "राज्य व केंद्र शासित"],
+                  [ATHLETES.length, "Athletes", "खिलाड़ी"],
+                  [sportCounts.length, "Sports", "खेल"],
+                  [medallists, "Olympic & Para medallists", "ओलंपिक व पैरा पदक विजेता"],
+                ].map(([value, label, hi]) => (
                   <div key={label} className="bg-hero/80 px-4 py-4 transition-colors hover:bg-hero/60">
-                    <dt className="text-xs text-hero-muted">{label}</dt>
+                    <dt className="text-xs text-hero-muted"><T en={label} hi={hi} /></dt>
                     <dd className="mt-1 font-display text-2xl font-bold text-white"><AnimatedNumber value={value} /></dd>
                   </div>
                 ))}
@@ -100,7 +97,7 @@ export default function HomePage() {
           <Reveal delay={0.2} y={30} className="relative mx-auto w-full max-w-[560px] lg:max-w-none">
             <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 shadow-2xl shadow-black/30 sm:p-6">
               <div className="mb-2 flex items-center justify-between">
-                <p className="font-display text-base font-semibold text-white">Pick a state on the map</p>
+                <p className="font-display text-base font-semibold text-white"><T en="Pick a state on the map" hi="मैप पर राज्य चुनें" /></p>
                 <Link href="/states" className="text-xs font-semibold text-[#FFB366] hover:underline">List view</Link>
               </div>
               <div className="mx-auto max-w-[460px]">
@@ -118,7 +115,7 @@ export default function HomePage() {
       <section className="site-container py-20">
         <Reveal><SectionHeading
           eyebrow="Champions"
-          title="India's medal-winning athletes"
+          title="India's medal-winning athletes" titleHi="भारत के पदक विजेता खिलाड़ी"
           text="Olympic and Paralympic medallists and world champions from across the country."
           action={{ href: "/athletes", label: "All athletes" }}
         /></Reveal>
@@ -134,7 +131,7 @@ export default function HomePage() {
       {/* Sports */}
       <section className="border-y border-border bg-card">
         <div className="site-container py-20">
-          <Reveal><SectionHeading eyebrow="Sports" title="Explore by sport" text="Pick a sport to see every listed athlete across India." /></Reveal>
+          <Reveal><SectionHeading eyebrow="Sports" title="Explore by sport" titleHi="खेल के अनुसार देखें" text="Pick a sport to see every listed athlete across India." /></Reveal>
           <Stagger gap={0.03} className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {sportCounts.map(({ sport, slug, count }) => (
               <StaggerItem key={slug}>
@@ -193,7 +190,7 @@ export default function HomePage() {
       <section className="site-container pb-4">
         <Reveal><SectionHeading
           eyebrow="Regions"
-          title="Browse India by zone"
+          title="Browse India by zone" titleHi="क्षेत्र के अनुसार भारत"
           text={`All 28 states and 8 union territories have their own page${regionsWithAthletes === INDIA_REGIONS.length ? ", each with listed athletes" : `, and ${regionsWithAthletes} already list athletes`}. More are added as sources are checked.`}
           action={{ href: "/states", label: "All states & UTs" }}
         /></Reveal>

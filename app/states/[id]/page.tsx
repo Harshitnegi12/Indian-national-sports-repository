@@ -70,15 +70,15 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
   const playerSports = sportCounts.length ? [...sportCounts.map((s) => s.sport), ...SPORT_CATEGORIES.filter((s) => !sportCounts.some((c) => c.sport === s))] : SPORT_CATEGORIES
 
   const sections = [
-    champions.length ? { id: "champions", label: "Champions" } : null,
-    hasMap ? { id: "map", label: "District map" } : null,
-    { id: "athletes", label: "All athletes" },
-    extras.districts?.length ? { id: "districts", label: "Districts" } : null,
-    extras.facts?.length ? { id: "facts", label: "Did you know" } : null,
-    { id: "academies", label: "Academies" },
-    { id: "player-corner", label: "Player Corner" },
-    { id: "sources", label: "Sources" },
-  ].filter(Boolean) as { id: string; label: string }[]
+    champions.length ? { id: "champions", label: "Champions", hi: "चैंपियन" } : null,
+    hasMap ? { id: "map", label: "District map", hi: "ज़िला मैप" } : null,
+    { id: "athletes", label: "All athletes", hi: "सभी खिलाड़ी" },
+    extras.districts?.length ? { id: "districts", label: "Districts", hi: "ज़िले" } : null,
+    extras.facts?.length ? { id: "facts", label: "Did you know", hi: "क्या आप जानते हैं" } : null,
+    { id: "academies", label: "Academies", hi: "अकादमियां" },
+    { id: "player-corner", label: "Player Corner", hi: "प्लेयर कॉर्नर" },
+    { id: "sources", label: "Sources", hi: "स्रोत" },
+  ].filter(Boolean) as { id: string; label: string; hi?: string }[]
 
   return (
     <div style={{ ["--accent-region" as string]: meta.accent }}>

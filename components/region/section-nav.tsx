@@ -2,9 +2,10 @@
 
 import * as React from "react"
 import { motion, useScroll, useSpring } from "motion/react"
+import { T } from "@/components/site/lang"
 
 /** Sticky in-page menu that highlights the section in view, plus a reading-progress bar. */
-export function SectionNav({ sections, accent }: { sections: { id: string; label: string }[]; accent: string }) {
+export function SectionNav({ sections, accent }: { sections: { id: string; label: string; hi?: string }[]; accent: string }) {
   const [active, setActive] = React.useState(sections[0]?.id)
   const navRef = React.useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll()
@@ -59,7 +60,7 @@ export function SectionNav({ sections, accent }: { sections: { id: string; label
               className={"pressable relative shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors " + (isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground")}
             >
               {isActive && <motion.span layoutId="section-pill" className="absolute inset-0 rounded-lg bg-muted" transition={{ type: "spring", stiffness: 500, damping: 40 }} />}
-              <span className="relative">{section.label}</span>
+              <span className="relative">{section.hi ? <T en={section.label} hi={section.hi} /> : section.label}</span>
             </a>
           )
         })}

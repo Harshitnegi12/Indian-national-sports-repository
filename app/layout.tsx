@@ -49,7 +49,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           id="theme-init"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: `try { const saved = localStorage.getItem('insr-theme'); const theme = saved === 'dark' || saved === 'light' ? saved : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.classList.add(theme); } catch { document.documentElement.classList.add('light'); }`,
+            __html: `try { const saved = localStorage.getItem('insr-theme'); const theme = saved === 'dark' || saved === 'light' ? saved : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.classList.add(theme); if (localStorage.getItem('insr-lang') === 'hi') { document.documentElement.classList.add('lang-hi'); document.documentElement.lang = 'hi' } } catch { document.documentElement.classList.add('light'); }`,
           }}
         />
       </head>

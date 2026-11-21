@@ -241,6 +241,11 @@
   filter: drop-shadow(0 4px 8px rgb(0 0 0 / 0.25));
 }
 
+/* Bilingual text (see components/site/lang.tsx) */
+.t-hi { display: none; }
+html.lang-hi .t-en { display: none; }
+html.lang-hi .t-hi { display: inline; }
+
 /* Press feedback for buttons and links */
 .pressable {
   transition: transform 0.15s var(--ease-out), background-color 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s;

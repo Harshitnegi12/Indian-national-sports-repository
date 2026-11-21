@@ -9,22 +9,23 @@ import { INDIA_REGIONS, type ZoneType } from "@/lib/india-sports-data"
 import { ThemeToggle } from "@/components/site/theme-toggle"
 import { SearchDialog, type SearchItem } from "@/components/site/search-dialog"
 import { BrandMark } from "@/components/site/brand-mark"
+import { LanguageToggle, T } from "@/components/site/lang"
 
 const ZONE_ORDER: ZoneType[] = ["North", "North-East", "East", "Central", "West", "South", "Coastal & Islands"]
 
 const EXPLORE = [
-  { href: "/rankings", label: "State rankings", text: "Medal tally and who leads in each sport" },
-  { href: "/women", label: "Women in Sports", text: "India's sportswomen across every era" },
-  { href: "/para", label: "Para Champions", text: "Paralympians and para athletes" },
-  { href: "/compare", label: "Compare players", text: "Two athletes side by side" },
-  { href: "/timeline", label: "Timeline & decades", text: "Heroes of every decade since 1947" },
-  { href: "/data-notes", label: "Data notes", text: "Sources and how we check data" },
+  { href: "/rankings", label: "State rankings", hi: "राज्य रैंकिंग", text: "Medal tally and who leads in each sport" },
+  { href: "/women", label: "Women in Sports", hi: "खेलों में महिलाएं", text: "India's sportswomen across every era" },
+  { href: "/para", label: "Para Champions", hi: "पैरा चैंपियन", text: "Paralympians and para athletes" },
+  { href: "/compare", label: "Compare players", hi: "खिलाड़ियों की तुलना", text: "Two athletes side by side" },
+  { href: "/timeline", label: "Timeline & decades", hi: "दशक दर दशक", text: "Heroes of every decade since 1947" },
+  { href: "/data-notes", label: "Data notes", hi: "डेटा और स्रोत", text: "Sources and how we check data" },
 ]
 
 const NAV = [
-  { href: "/", label: "Home" },
-  { href: "/athletes", label: "Athletes" },
-  { href: "/sports", label: "Sports" },
+  { href: "/", label: "Home", hi: "होम" },
+  { href: "/athletes", label: "Athletes", hi: "खिलाड़ी" },
+  { href: "/sports", label: "Sports", hi: "खेल" },
 
 ]
 
@@ -109,7 +110,7 @@ export function SiteHeader() {
           </Link>
 
           <nav aria-label="Main" className="ml-4 hidden items-center gap-0.5 whitespace-nowrap lg:flex xl:ml-8">
-            <NavLink href="/" active={isActive("/")}>Home</NavLink>
+            <NavLink href="/" active={isActive("/")}><T en="Home" hi="होम" /></NavLink>
             <div ref={statesRef} className="relative">
               <button
                 type="button"
@@ -118,7 +119,7 @@ export function SiteHeader() {
                 onClick={() => setStatesOpen((open) => !open)}
                 className={"inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition " + (statesActive ? "text-foreground" : "text-muted-foreground hover:text-foreground")}
               >
-                States &amp; UTs
+                <T en="States & UTs" hi="राज्य" />
                 <ChevronDown className={"size-4 transition " + (statesOpen ? "rotate-180" : "")} />
                 {statesActive && <motion.span layoutId="nav-underline" className="absolute inset-x-3 -bottom-[13px] h-0.5 rounded-full bg-saffron" />}
               </button>
@@ -150,7 +151,7 @@ export function SiteHeader() {
               </AnimatePresence>
             </div>
             {NAV.slice(1).map((item) => (
-              <NavLink key={item.href} href={item.href} active={isActive(item.href)}>{item.label}</NavLink>
+              <NavLink key={item.href} href={item.href} active={isActive(item.href)}><T en={item.label} hi={item.hi} /></NavLink>
             ))}
             <ExploreMenu pathname={pathname} />
           </nav>
@@ -166,7 +167,7 @@ export function SiteHeader() {
               <span className="hidden whitespace-nowrap xl:inline">Search athletes, states…</span>
               <kbd className="ml-3 hidden whitespace-nowrap rounded border border-border bg-muted px-1.5 font-mono text-[10px] xl:inline">Ctrl K</kbd>
             </button>
-            <ThemeToggle />
+            <LanguageToggle />
             <button
               type="button"
               className="inline-flex size-9 items-center justify-center rounded-lg border border-border bg-card lg:hidden"
@@ -186,7 +187,7 @@ export function SiteHeader() {
                 <li><Link href="/" className="block rounded-lg px-3 py-2.5 font-medium hover:bg-muted">Home</Link></li>
                 <li><Link href="/states" className="block rounded-lg px-3 py-2.5 font-medium hover:bg-muted">All states &amp; UTs</Link></li>
                 {[...NAV.slice(1), ...EXPLORE].map((item) => (
-                  <li key={item.href}><Link href={item.href} className="block rounded-lg px-3 py-2.5 font-medium hover:bg-muted">{item.label}</Link></li>
+                  <li key={item.href}><Link href={item.href} className="block rounded-lg px-3 py-2.5 font-medium hover:bg-muted"><T en={item.label} hi={item.hi} /></Link></li>
                 ))}
               </ul>
               <div className="mt-4 border-t border-border pt-4">
@@ -238,7 +239,7 @@ function ExploreMenu({ pathname }: { pathname: string }) {
   return (
     <div ref={ref} className="relative">
       <button type="button" aria-expanded={open} onClick={() => setOpen((v) => !v)} className={"relative inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition " + (active ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
-        Explore <ChevronDown className={"size-4 transition " + (open ? "rotate-180" : "")} />
+        <T en="Explore" hi="और देखें" /> <ChevronDown className={"size-4 transition " + (open ? "rotate-180" : "")} />
         {active && <motion.span layoutId="nav-underline" className="absolute inset-x-3 -bottom-[13px] h-0.5 rounded-full bg-saffron" />}
       </button>
       <AnimatePresence>
@@ -246,7 +247,7 @@ function ExploreMenu({ pathname }: { pathname: string }) {
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6, transition: { duration: 0.12 } }} className="absolute right-0 top-full mt-3 w-80 rounded-2xl border border-border bg-popover p-2 shadow-2xl shadow-black/10">
             {EXPLORE.map((item) => (
               <Link key={item.href} href={item.href} className={"block rounded-xl px-3 py-2.5 transition hover:bg-muted " + (pathname.startsWith(item.href) ? "bg-muted" : "")}>
-                <span className="block text-sm font-semibold">{item.label}</span>
+                <span className="block text-sm font-semibold"><T en={item.label} hi={item.hi} /></span>
                 <span className="block text-xs text-muted-foreground">{item.text}</span>
               </Link>
             ))}
