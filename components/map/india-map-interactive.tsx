@@ -100,7 +100,7 @@ export function IndiaMapInteractive({ regions, children }: { regions: MapRegionI
               transition={{ type: "spring", stiffness: 520, damping: 38, mass: 0.6 }}
               className="pointer-events-none absolute left-0 top-0 z-20"
             >
-              <div className="w-56 -translate-x-1/2 -translate-y-[calc(100%+16px)] rounded-xl border border-white/15 bg-slate-950/90 p-3.5 text-white shadow-2xl backdrop-blur-md">
+              <div className={"w-56 -translate-x-1/2 rounded-xl " + (pos.y < 170 ? "translate-y-5" : "-translate-y-[calc(100%+16px)]") + " border border-white/15 bg-slate-950/90 p-3.5 text-white shadow-2xl backdrop-blur-md"}>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/55">{tooltipInfo.type} · {tooltipInfo.zone}</p>
                 <p className="mt-0.5 font-display text-base font-bold leading-tight">{tooltipInfo.name}</p>
                 <p className="font-hindi text-sm text-white/60">{tooltipInfo.hindi}</p>
