@@ -43,6 +43,10 @@ export default function DataNotesPage() {
           <p className="mt-3 text-sm leading-7 text-foreground/80">
             Birthplace, home state, training location and representing state can differ. Each profile should state which connection its cited source supports.
           </p>
+          <p className="mt-3 text-sm leading-7 text-foreground/80">
+            Profiles added in bulk link to the athlete&apos;s Wikipedia biography, which in turn cites official records. A script checks that every one of these
+            links opens the right person&apos;s page. These links are being replaced with primary sources (federations, IOA, SAI, Olympics.com) over time.
+          </p>
         </section>
 
         <section className="mt-10">

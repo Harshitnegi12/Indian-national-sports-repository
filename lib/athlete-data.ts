@@ -1,5 +1,8 @@
-﻿import { INDIA_REGIONS } from "@/lib/india-sports-data"
+import { INDIA_REGIONS } from "@/lib/india-sports-data"
 import { HARYANA_ATHLETES, HARYANA_ENRICHMENT } from "@/lib/data/haryana"
+import { BATCH_1_ATHLETES } from "@/lib/data/athletes-batch-1"
+import { BATCH_2_ATHLETES } from "@/lib/data/athletes-batch-2"
+import { BATCH_3_ATHLETES } from "@/lib/data/athletes-batch-3"
 
 export interface AthleteSource {
   label: string
@@ -508,7 +511,7 @@ export function getAthleteTier(athlete: AthleteRecord): AthleteTier | undefined 
 }
 
 const seen = new Set<string>()
-export const ATHLETES: AthleteRecord[] = [...BASE_ATHLETES, ...HARYANA_ATHLETES]
+export const ATHLETES: AthleteRecord[] = [...BASE_ATHLETES, ...HARYANA_ATHLETES, ...BATCH_1_ATHLETES, ...BATCH_2_ATHLETES, ...BATCH_3_ATHLETES]
   .filter((athlete) => (seen.has(athlete.id) ? false : (seen.add(athlete.id), true)))
   .map(enrich)
   .map((athlete) => ({ ...athlete, tier: getAthleteTier(athlete) }))
@@ -574,7 +577,7 @@ export const SPORT_CATEGORIES = [
   "Alpine skiing", "Archery", "Athletics", "Badminton", "Basketball", "Boxing", "Cricket",
   "Football", "Hockey", "Ice hockey", "Kabaddi", "Shooting", "Sepaktakraw", "Squash", "Swimming", "Table tennis",
   "Tennis", "Volleyball", "Weightlifting", "Wrestling", "Gymnastics", "Para athletics",
-  "Para badminton", "Para shooting", "Para table tennis", "Para archery",
+  "Para badminton", "Para shooting", "Para table tennis", "Para archery", "Chess", "Judo", "Para judo",
 ]
 
 /** Sport names in Devanagari. */
@@ -584,7 +587,7 @@ export const SPORT_HINDI: Record<string, string> = {
   "Ice hockey": "आइस हॉकी", Kabaddi: "कबड्डी", Shooting: "निशानेबाज़ी", Sepaktakraw: "सेपक टकरॉ", Squash: "स्क्वैश",
   Swimming: "तैराकी", "Table tennis": "टेबल टेनिस", Tennis: "टेनिस", Volleyball: "वॉलीबॉल", Weightlifting: "भारोत्तोलन",
   Wrestling: "कुश्ती", Gymnastics: "जिम्नास्टिक्स", "Para athletics": "पैरा एथलेटिक्स", "Para badminton": "पैरा बैडमिंटन",
-  "Para shooting": "पैरा निशानेबाज़ी", "Para table tennis": "पैरा टेबल टेनिस", "Para archery": "पैरा तीरंदाज़ी",
+  "Para shooting": "पैरा निशानेबाज़ी", "Para table tennis": "पैरा टेबल टेनिस", "Para archery": "पैरा तीरंदाज़ी", Chess: "शतरंज", Judo: "जूडो", "Para judo": "पैरा जूडो",
 }
 
 export function getSportEvent(athlete: AthleteRecord) {
