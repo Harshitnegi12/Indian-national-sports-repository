@@ -9,6 +9,7 @@ export interface AthleteProfile {
   story?: string
   born?: string
   birthplace?: string
+  gender?: "female" | "male"
   image?: { src: string; width: number; height: number; file: string; credit?: string; license?: string; page?: string }
 }
 

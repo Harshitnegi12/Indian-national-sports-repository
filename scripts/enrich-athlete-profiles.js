@@ -106,6 +106,9 @@ async function main() {
       const claims = data.entities?.[q]?.claims || {}
       const born = claims.P569?.[0]?.mainsnak?.datavalue?.value?.time
       const place = claims.P19?.[0]?.mainsnak?.datavalue?.value?.id
+      const sex = claims.P21?.[0]?.mainsnak?.datavalue?.value?.id
+      if (sex === "Q6581072" || sex === "Q1052281") profiles[id].gender = "female"
+      else if (sex === "Q6581097" || sex === "Q2449503") profiles[id].gender = "male"
       if (born) profiles[id].born = born.replace(/^\+/, "").slice(0, 10).replace(/-00/g, "")
       if (place) { profiles[id].placeId = place; places.set(place, null) }
     }

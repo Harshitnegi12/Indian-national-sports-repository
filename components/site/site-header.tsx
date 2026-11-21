@@ -12,11 +12,20 @@ import { BrandMark } from "@/components/site/brand-mark"
 
 const ZONE_ORDER: ZoneType[] = ["North", "North-East", "East", "Central", "West", "South", "Coastal & Islands"]
 
+const EXPLORE = [
+  { href: "/rankings", label: "State rankings", text: "Medal tally and who leads in each sport" },
+  { href: "/women", label: "Women in Sports", text: "India's sportswomen across every era" },
+  { href: "/para", label: "Para Champions", text: "Paralympians and para athletes" },
+  { href: "/compare", label: "Compare players", text: "Two athletes side by side" },
+  { href: "/timeline", label: "Timeline & decades", text: "Heroes of every decade since 1947" },
+  { href: "/data-notes", label: "Data notes", text: "Sources and how we check data" },
+]
+
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/athletes", label: "Athletes" },
   { href: "/sports", label: "Sports" },
-  { href: "/data-notes", label: "Data notes" },
+
 ]
 
 export function SiteHeader() {
@@ -143,6 +152,7 @@ export function SiteHeader() {
             {NAV.slice(1).map((item) => (
               <NavLink key={item.href} href={item.href} active={isActive(item.href)}>{item.label}</NavLink>
             ))}
+            <ExploreMenu pathname={pathname} />
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
@@ -175,7 +185,7 @@ export function SiteHeader() {
               <ul className="grid gap-1">
                 <li><Link href="/" className="block rounded-lg px-3 py-2.5 font-medium hover:bg-muted">Home</Link></li>
                 <li><Link href="/states" className="block rounded-lg px-3 py-2.5 font-medium hover:bg-muted">All states &amp; UTs</Link></li>
-                {NAV.slice(1).map((item) => (
+                {[...NAV.slice(1), ...EXPLORE].map((item) => (
                   <li key={item.href}><Link href={item.href} className="block rounded-lg px-3 py-2.5 font-medium hover:bg-muted">{item.label}</Link></li>
                 ))}
               </ul>
@@ -212,5 +222,37 @@ function NavLink({ href, active, children }: { href: string; active: boolean; ch
       {children}
       {active && <motion.span layoutId="nav-underline" className="absolute inset-x-3 -bottom-[13px] h-0.5 rounded-full bg-saffron" />}
     </Link>
+  )
+}
+
+function ExploreMenu({ pathname }: { pathname: string }) {
+  const [open, setOpen] = React.useState(false)
+  const ref = React.useRef<HTMLDivElement>(null)
+  React.useEffect(() => setOpen(false), [pathname])
+  React.useEffect(() => {
+    const onDown = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener("mousedown", onDown)
+    return () => document.removeEventListener("mousedown", onDown)
+  }, [])
+  const active = EXPLORE.some((item) => pathname.startsWith(item.href))
+  return (
+    <div ref={ref} className="relative">
+      <button type="button" aria-expanded={open} onClick={() => setOpen((v) => !v)} className={"relative inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition " + (active ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
+        Explore <ChevronDown className={"size-4 transition " + (open ? "rotate-180" : "")} />
+        {active && <motion.span layoutId="nav-underline" className="absolute inset-x-3 -bottom-[13px] h-0.5 rounded-full bg-saffron" />}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6, transition: { duration: 0.12 } }} className="absolute right-0 top-full mt-3 w-80 rounded-2xl border border-border bg-popover p-2 shadow-2xl shadow-black/10">
+            {EXPLORE.map((item) => (
+              <Link key={item.href} href={item.href} className={"block rounded-xl px-3 py-2.5 transition hover:bg-muted " + (pathname.startsWith(item.href) ? "bg-muted" : "")}>
+                <span className="block text-sm font-semibold">{item.label}</span>
+                <span className="block text-xs text-muted-foreground">{item.text}</span>
+              </Link>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
