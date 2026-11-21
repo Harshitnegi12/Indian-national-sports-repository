@@ -5,6 +5,7 @@ import "./globals.css"
 import { SiteHeader } from "@/components/site/site-header"
 import { SiteFooter } from "@/components/site/site-footer"
 import { MotionProvider, SpotlightTracker } from "@/components/motion/motion-primitives"
+import { SITE_URL } from "@/lib/site-config"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
 const bricolage = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage", display: "swap" })
@@ -12,6 +13,7 @@ const mukta = Mukta({ subsets: ["devanagari", "latin"], weight: ["400", "600", "
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Indian Sports Repository | Athletes from every state and union territory",
     template: "%s | Indian Sports Repository",

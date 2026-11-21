@@ -22,6 +22,8 @@ import { SectionNav } from "@/components/region/section-nav"
 import { StateMap } from "@/components/map/state-map"
 import { athletesByDistrict, getDistrictMap } from "@/lib/district-map"
 import { getAthleteProfile } from "@/lib/athlete-profiles"
+import { ReportError } from "@/components/site/report-error"
+import { DATA_UPDATED } from "@/lib/site-config"
 import { AnimatedNumber, Reveal, Stagger, StaggerItem } from "@/components/motion/motion-primitives"
 
 export function generateStaticParams() {
@@ -326,6 +328,7 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
               <li className="py-3">
                 <Link href="/data-notes" className="inline-flex items-center gap-1.5 text-sm font-semibold hover:underline">How we check data <ArrowRight className="size-3.5" /></Link>
               </li>
+              <li className="py-3 text-xs text-muted-foreground">Last updated {DATA_UPDATED} <ReportError subject={`State page: ${region.name}`} className="ml-3 mt-0" /></li>
             </ul>
           </div>
           <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">

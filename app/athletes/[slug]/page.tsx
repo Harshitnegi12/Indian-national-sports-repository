@@ -18,6 +18,9 @@ import { getAthleteVideos } from "@/lib/athlete-videos"
 import { AthleteAvatar, AthleteCard, TierBadge } from "@/components/site/athlete-card"
 import { LiteYouTube } from "@/components/athlete/lite-youtube"
 import { Reveal } from "@/components/motion/motion-primitives"
+import { ShareActions } from "@/components/athlete/share-actions"
+import { ReportError } from "@/components/site/report-error"
+import { DATA_UPDATED } from "@/lib/site-config"
 
 export function generateStaticParams() {
   return getAthleteStaticParams()
@@ -28,7 +31,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const athlete = getAthleteById(slug)
   if (!athlete) return {}
   const profile = getAthleteProfile(slug)
-  return { title: athlete.name, description: athlete.summary, openGraph: profile?.image ? { images: [profile.image.src] } : undefined }
+  void profile
+  const image = { url: `/api/share/${slug}`, width: 1200, height: 630 }
+  return { title: athlete.name, description: athlete.summary, openGraph: { images: [image] }, twitter: { card: "summary_large_image", images: [image.url] } }
 }
 
 export default async function AthletePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -95,6 +100,7 @@ export default async function AthletePage({ params }: { params: Promise<{ slug: 
                 {born && <span className="inline-flex items-center gap-1.5"><Cake className="size-4" /> Born {born}</span>}
               </div>
               <p className="mt-5 max-w-3xl text-lg leading-8 text-hero-muted">{athlete.summary}</p>
+              <ShareActions id={athlete.id} name={athlete.name} />
             </Reveal>
           </div>
         </div>
@@ -195,7 +201,8 @@ export default async function AthletePage({ params }: { params: Promise<{ slug: 
                   <a href={profile.image.page} target="_blank" rel="noopener noreferrer" className="underline">{profile.image.license}</a>, via Wikimedia Commons.
                 </p>
               )}
-              <p className="mt-3 rounded-lg bg-muted/60 p-3 text-xs leading-5 text-muted-foreground">This profile is selective and source-linked, not a complete career record.</p>
+              <p className="mt-3 rounded-lg bg-muted/60 p-3 text-xs leading-5 text-muted-foreground">This profile is selective and source-linked, not a complete career record. Last updated {DATA_UPDATED}.</p>
+              <ReportError subject={`Profile: ${athlete.name}`} />
             </section>
           </Reveal>
         </aside>
