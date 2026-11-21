@@ -19,6 +19,9 @@ import { PlayerCorner } from "@/components/region/player-corner"
 import { AthleteAvatar, TierBadge } from "@/components/site/athlete-card"
 import { SectionHeading } from "@/components/site/section-heading"
 import { SectionNav } from "@/components/region/section-nav"
+import { StateMap } from "@/components/map/state-map"
+import { athletesByDistrict, getDistrictMap } from "@/lib/district-map"
+import { getAthleteProfile } from "@/lib/athlete-profiles"
 import { AnimatedNumber, Reveal, Stagger, StaggerItem } from "@/components/motion/motion-primitives"
 
 export function generateStaticParams() {
@@ -45,6 +48,10 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
   const extras = getRegionExtras(id)
   const athletes = [...getAthletesForRegion(id)].sort(compareAthletes)
   const sportCounts = getSportCounts(athletes)
+  const athletesWithPlace = athletes.map((athlete) => ({ ...athlete, birthplace: getAthleteProfile(athlete.id)?.birthplace }))
+  const districtOf: Record<string, string> = {}
+  for (const [district, list] of athletesByDistrict(id, athletesWithPlace)) for (const athlete of list) districtOf[athlete.id] = district
+  const hasMap = Boolean(getDistrictMap(id)?.districts.length)
   const champions = athletes.filter((athlete) => athlete.featured || isMedallist(athlete)).slice(0, 6)
   const medallists = athletes.filter(isMedallist).length
   const { previous, next } = getAdjacentRegions(id)
@@ -62,6 +69,7 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
 
   const sections = [
     champions.length ? { id: "champions", label: "Champions" } : null,
+    hasMap ? { id: "map", label: "District map" } : null,
     { id: "athletes", label: "All athletes" },
     extras.districts?.length ? { id: "districts", label: "Districts" } : null,
     extras.facts?.length ? { id: "facts", label: "Did you know" } : null,
@@ -176,6 +184,16 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
         </section>
       )}
 
+      {/* District map */}
+      {hasMap && (
+        <section id="map" className="site-container scroll-mt-32 pt-16">
+          <Reveal><SectionHeading eyebrow="District map" title={`Explore ${region.name} district by district`} text="Hover over a district to see who comes from there. Click it to filter the athlete list." /></Reveal>
+          <Reveal className="mt-8">
+            <StateMap regionId={id} athletes={athletesWithPlace} accent={meta.accent} />
+          </Reveal>
+        </section>
+      )}
+
       {/* All athletes */}
       <section id="athletes" className="site-container scroll-mt-32 pt-16">
         <Reveal><SectionHeading
@@ -190,6 +208,7 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
               sports={sportCounts.map(({ sport, count }) => ({ sport, count, hindi: SPORT_HINDI[sport] ?? "" }))}
               accent={meta.accent}
               regionName={region.name}
+              districtOf={districtOf}
             />
           ) : (
             <div className="rounded-2xl border border-dashed border-border bg-card p-10 sm:p-14">

@@ -112,7 +112,12 @@ export function SearchDialog({ open, onOpenChange, items, initialQuery = "" }: {
               </button>
             </li>
           ))}
-          {query.trim() && results.length === 0 && (
+          {items.length === 0 && (
+            <li className="space-y-2 p-2" aria-label="Loading search">
+              {[0, 1, 2].map((i) => <div key={i} className="skeleton h-12 w-full" />)}
+            </li>
+          )}
+          {items.length > 0 && query.trim() && results.length === 0 && (
             <li className="px-4 py-10 text-center text-sm text-muted-foreground">No athlete or state matches “{query}”.</li>
           )}
         </ul>

@@ -14,20 +14,31 @@ export function RegionAthletes({
   sports,
   accent,
   regionName,
+  districtOf = {},
 }: {
   athletes: AthleteRecord[]
   sports: { sport: string; hindi: string; count: number }[]
   accent: string
   regionName: string
+  districtOf?: Record<string, string>
 }) {
+  const [district, setDistrict] = React.useState<string | null>(null)
   const [sport, setSport] = React.useState("all")
   const [query, setQuery] = React.useState("")
   const [sort, setSort] = React.useState<Sort>("achievement")
+  const [limit, setLimit] = React.useState(24)
   const deferredQuery = React.useDeferredValue(query)
+  React.useEffect(() => setLimit(24), [sport, deferredQuery, sort])
 
   // Allow deep links such as /states/haryana#sport=Wrestling
   React.useEffect(() => {
     function applyHash() {
+      const districtMatch = window.location.hash.match(/district=([^&]+)/)
+      if (districtMatch) {
+        setDistrict(decodeURIComponent(districtMatch[1]))
+        window.setTimeout(() => document.getElementById("athletes")?.scrollIntoView({ block: "start" }), 150)
+        return
+      }
       const match = window.location.hash.match(/sport=([^&]+)/)
       if (!match) return
       const wanted = decodeURIComponent(match[1]).toLowerCase()
@@ -47,9 +58,10 @@ export function RegionAthletes({
     const q = deferredQuery.trim().toLowerCase()
     return athletes
       .filter((athlete) => sport === "all" || getSportCategory(athlete) === sport)
+      .filter((athlete) => !district || districtOf[athlete.id] === district)
       .filter((athlete) => !q || [athlete.name, athlete.sport, athlete.hometown ?? ""].join(" ").toLowerCase().includes(q))
       .sort(sort === "name" ? (a, b) => a.name.localeCompare(b.name) : compareAthletes)
-  }, [athletes, sport, deferredQuery, sort])
+  }, [athletes, sport, deferredQuery, sort, district, districtOf])
 
   const chips = [{ sport: "all", hindi: "", count: athletes.length }, ...sports]
 
@@ -76,6 +88,15 @@ export function RegionAthletes({
           })}
         </div>
       </LayoutGroup>
+
+      {district && (
+        <div className="mt-4 flex items-center gap-2 text-sm">
+          <span className="text-muted-foreground">District:</span>
+          <button type="button" onClick={() => { setDistrict(null); history.replaceState(null, "", window.location.pathname) }} className="pressable inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1 font-medium text-background">
+            {district} <X className="size-3.5" />
+          </button>
+        </div>
+      )}
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
         <label className="relative block w-full sm:max-w-sm">
@@ -111,7 +132,7 @@ export function RegionAthletes({
 
       <motion.div layout className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <AnimatePresence mode="popLayout" initial={false}>
-          {visible.map((athlete) => (
+          {visible.slice(0, limit).map((athlete) => (
             <motion.div
               key={athlete.id}
               layout
@@ -125,6 +146,13 @@ export function RegionAthletes({
           ))}
         </AnimatePresence>
       </motion.div>
+      {visible.length > limit && (
+        <div className="mt-8 flex justify-center">
+          <button type="button" onClick={() => setLimit((l) => l + 24)} className="pressable rounded-xl border border-border bg-card px-6 py-3 text-sm font-semibold hover:border-foreground/25">
+            Show more ({visible.length - limit} more)
+          </button>
+        </div>
+      )}
 
       <AnimatePresence>
         {!visible.length && (

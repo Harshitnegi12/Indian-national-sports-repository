@@ -18,7 +18,8 @@ const NAV = [
   { href: "/data-notes", label: "Data notes" },
 ]
 
-export function SiteHeader({ searchItems }: { searchItems: SearchItem[] }) {
+export function SiteHeader() {
+  const [searchItems, setSearchItems] = React.useState<SearchItem[]>([])
   const pathname = usePathname()
   const [statesOpen, setStatesOpen] = React.useState(false)
   const [mobileOpen, setMobileOpen] = React.useState(false)
@@ -26,6 +27,12 @@ export function SiteHeader({ searchItems }: { searchItems: SearchItem[] }) {
   const [initialQuery, setInitialQuery] = React.useState("")
   const [scrolled, setScrolled] = React.useState(false)
   const statesRef = React.useRef<HTMLDivElement>(null)
+
+  // Load the search index the first time search is opened.
+  React.useEffect(() => {
+    if (!searchOpen || searchItems.length) return
+    fetch("/api/search").then((res) => res.json()).then(setSearchItems).catch(() => {})
+  }, [searchOpen, searchItems.length])
 
   // Close menus whenever the route changes.
   React.useEffect(() => {

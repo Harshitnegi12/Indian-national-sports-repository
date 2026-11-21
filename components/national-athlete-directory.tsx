@@ -15,6 +15,8 @@ export function NationalAthleteDirectory({ accents }: { accents: Record<string, 
   const [region, setRegion] = React.useState(params.get("region") ?? "all")
   const [medalOnly, setMedalOnly] = React.useState(false)
   const [sort, setSort] = React.useState<"achievement" | "name">("achievement")
+  const [limit, setLimit] = React.useState(48)
+  React.useEffect(() => setLimit(48), [query, sport, region, medalOnly, sort])
 
   const sports = React.useMemo(() => Array.from(new Set(ATHLETES.map((athlete) => getSportCategory(athlete)))).sort(), [])
 
@@ -64,9 +66,10 @@ export function NationalAthleteDirectory({ accents }: { accents: Record<string, 
       </div>
 
       {filtered.length ? (
+        <>
         <motion.div layout className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <AnimatePresence mode="popLayout" initial={false}>
-            {filtered.map((athlete) => (
+            {filtered.slice(0, limit).map((athlete) => (
               <motion.div
                 key={athlete.id}
                 layout
@@ -80,6 +83,14 @@ export function NationalAthleteDirectory({ accents }: { accents: Record<string, 
             ))}
           </AnimatePresence>
         </motion.div>
+      {filtered.length > limit && (
+        <div className="mt-8 flex justify-center">
+          <button type="button" onClick={() => setLimit((l) => l + 48)} className="pressable rounded-xl border border-border bg-card px-6 py-3 text-sm font-semibold hover:border-foreground/25">
+            Show more ({filtered.length - limit} more)
+          </button>
+        </div>
+      )}
+        </>
       ) : (
         <div className="mt-6 rounded-2xl border border-dashed border-border bg-card p-10 text-center">
           <p className="font-semibold">No athletes match these filters.</p>

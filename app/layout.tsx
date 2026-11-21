@@ -4,7 +4,6 @@ import Script from "next/script"
 import "./globals.css"
 import { SiteHeader } from "@/components/site/site-header"
 import { SiteFooter } from "@/components/site/site-footer"
-import { buildSearchIndex } from "@/lib/search-index"
 import { MotionProvider, SpotlightTracker } from "@/components/motion/motion-primitives"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
@@ -37,7 +36,6 @@ export const viewport: Viewport = {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const searchItems = buildSearchIndex()
   return (
     <html
       lang="en"
@@ -58,7 +56,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           Skip to content
         </a>
         <MotionProvider>
-          <SiteHeader searchItems={searchItems} />
+          <SiteHeader />
           <main id="main">{children}</main>
           <SiteFooter />
         </MotionProvider>

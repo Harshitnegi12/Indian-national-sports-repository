@@ -3,6 +3,7 @@ import { HARYANA_ATHLETES, HARYANA_ENRICHMENT } from "@/lib/data/haryana"
 import { BATCH_1_ATHLETES } from "@/lib/data/athletes-batch-1"
 import { BATCH_2_ATHLETES } from "@/lib/data/athletes-batch-2"
 import { BATCH_3_ATHLETES } from "@/lib/data/athletes-batch-3"
+import { WIKI_ATHLETES } from "@/lib/data/athletes-wiki"
 
 export interface AthleteSource {
   label: string
@@ -510,9 +511,24 @@ export function getAthleteTier(athlete: AthleteRecord): AthleteTier | undefined 
   return undefined
 }
 
+// The same person can appear in hand-written data and in the Wikipedia import; the first one wins.
+// Duplicates are matched by id, by name without punctuation, and by Wikipedia article.
+function identityKeys(athlete: AthleteRecord) {
+  const keys = ["id:" + athlete.id, "name:" + athlete.name.toLowerCase().replace(/[^a-z]/g, "")]
+  for (const source of athlete.sources) {
+    const match = source.url.match(/wikipedia\.org\/wiki\/(.+)$/)
+    if (match) keys.push("wiki:" + decodeURIComponent(match[1]).toLowerCase())
+  }
+  return keys
+}
 const seen = new Set<string>()
-export const ATHLETES: AthleteRecord[] = [...BASE_ATHLETES, ...HARYANA_ATHLETES, ...BATCH_1_ATHLETES, ...BATCH_2_ATHLETES, ...BATCH_3_ATHLETES]
-  .filter((athlete) => (seen.has(athlete.id) ? false : (seen.add(athlete.id), true)))
+export const ATHLETES: AthleteRecord[] = [...BASE_ATHLETES, ...HARYANA_ATHLETES, ...BATCH_1_ATHLETES, ...BATCH_2_ATHLETES, ...BATCH_3_ATHLETES, ...WIKI_ATHLETES]
+  .filter((athlete) => {
+    const keys = identityKeys(athlete)
+    if (keys.some((key) => seen.has(key))) return false
+    keys.forEach((key) => seen.add(key))
+    return true
+  })
   .map(enrich)
   .map((athlete) => ({ ...athlete, tier: getAthleteTier(athlete) }))
 
