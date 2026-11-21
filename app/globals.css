@@ -175,6 +175,123 @@
   }
 }
 
+/* ---------- Interaction & motion ---------- */
+
+:root {
+  --map-low: #1F6F78;
+  --map-high: #F2861E;
+  --map-empty: rgb(255 255 255 / 0.08);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* India map */
+.india-map path,
+.india-map .map-marker {
+  stroke: rgb(255 255 255 / 0.28);
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.25s var(--ease-out), filter 0.25s var(--ease-out), stroke 0.2s, stroke-width 0.2s;
+  animation: map-in 0.7s var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 18ms + 150ms);
+}
+.india-map .map-marker {
+  stroke: #fff;
+  stroke-width: 1.2;
+  animation-delay: 900ms;
+}
+.india-map:has([data-active]) path:not([data-active]),
+.india-map:has([data-active]) .map-marker:not([data-active]) {
+  opacity: 0.45;
+}
+.india-map [data-active],
+.india-map path:focus-visible {
+  fill: #FFB15C !important;
+  stroke: #fff;
+  stroke-width: 1.4;
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.45)) drop-shadow(0 0 14px rgb(255 153 51 / 0.45));
+}
+.india-map [data-selected]:not([data-active]) {
+  stroke: #fff;
+  stroke-width: 1.1;
+}
+@keyframes map-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Press feedback for buttons and links */
+.pressable {
+  transition: transform 0.15s var(--ease-out), background-color 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.pressable:active {
+  transform: scale(0.97);
+}
+
+/* Cursor-following spotlight on cards (position set by SpotlightTracker) */
+.spotlight {
+  position: relative;
+  isolation: isolate;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), color-mix(in oklch, var(--accent-card, var(--saffron)) 12%, transparent), transparent 65%);
+}
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  padding: 1px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), color-mix(in oklch, var(--accent-card, var(--saffron)) 70%, transparent), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+@media (hover: hover) {
+  .spotlight:hover::before,
+  .spotlight:hover::after {
+    opacity: 1;
+  }
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  border-radius: 0.75rem;
+  background: linear-gradient(100deg, var(--muted) 30%, color-mix(in oklch, var(--muted) 60%, var(--card)) 50%, var(--muted) 70%);
+  background-size: 300% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+@keyframes shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+/* Horizontal swipe rails on mobile */
+.snap-rail {
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.snap-rail > * {
+  scroll-snap-align: start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .india-map path, .india-map .map-marker { animation: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }

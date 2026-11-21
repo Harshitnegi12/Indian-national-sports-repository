@@ -57,49 +57,6 @@ const MOTIF_ACCENT: Record<RegionMotif, string> = {
   heritage: "#9A3412",
 }
 
-/**
- * Tile-grid map of India: one square per region, placed roughly where it sits geographically.
- * col 0-8, row 0-7.
- */
-export const TILE_POSITIONS: Record<string, [col: number, row: number]> = {
-  "jammu-kashmir": [3, 0],
-  ladakh: [4, 0],
-  punjab: [2, 1],
-  chandigarh: [3, 1],
-  "himachal-pradesh": [4, 1],
-  rajasthan: [1, 2],
-  haryana: [2, 2],
-  "delhi-nct": [3, 2],
-  uttarakhand: [4, 2],
-  sikkim: [6, 2],
-  "arunachal-pradesh": [8, 2],
-  gujarat: [0, 3],
-  "madhya-pradesh": [2, 3],
-  "uttar-pradesh": [3, 3],
-  bihar: [4, 3],
-  meghalaya: [6, 3],
-  assam: [7, 3],
-  nagaland: [8, 3],
-  "dadra-nagar-haveli-daman-diu": [0, 4],
-  maharashtra: [1, 4],
-  chhattisgarh: [3, 4],
-  jharkhand: [4, 4],
-  "west-bengal": [5, 4],
-  tripura: [7, 4],
-  manipur: [8, 4],
-  goa: [1, 5],
-  telangana: [2, 5],
-  odisha: [4, 5],
-  mizoram: [8, 5],
-  karnataka: [1, 6],
-  "andhra-pradesh": [2, 6],
-  lakshadweep: [0, 7],
-  kerala: [1, 7],
-  "tamil-nadu": [2, 7],
-  puducherry: [3, 7],
-  "andaman-nicobar": [5, 7],
-}
-
 export interface RegionMeta {
   region: RegionData
   hindi: string

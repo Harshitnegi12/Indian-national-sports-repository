@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
+import { AnimatePresence, motion } from "motion/react"
 import { ArrowUpRight, Search, X } from "lucide-react"
 import { INDIA_REGIONS, type ZoneType } from "@/lib/india-sports-data"
 
@@ -83,9 +84,18 @@ export function StatesUtGrid({ regions }: { regions: RegionCardData[] }) {
       <p className="mt-6 text-sm text-muted-foreground" aria-live="polite">Showing {visible.length} of {regions.length} states and union territories</p>
 
       {visible.length ? (
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <motion.div layout className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <AnimatePresence mode="popLayout" initial={false}>
           {visible.map((region) => (
-            <Link key={region.id} href={"/states/" + region.id} className="group card-lift relative flex min-h-52 flex-col overflow-hidden rounded-2xl border border-border bg-card p-5">
+            <motion.div
+              key={region.id}
+              layout
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
+              transition={{ type: "spring", stiffness: 380, damping: 34, mass: 0.7 }}
+            >
+            <Link href={"/states/" + region.id} className="group spotlight card-lift pressable relative flex h-full min-h-52 flex-col overflow-hidden rounded-2xl border border-border bg-card p-5" style={{ ["--accent-card" as string]: region.accent }}>
               <span className="absolute inset-x-0 top-0 h-1" style={{ background: region.accent }} />
               <div className="flex items-center justify-between">
                 <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-[11px] font-semibold text-foreground/70">{region.code}</span>
@@ -102,8 +112,10 @@ export function StatesUtGrid({ regions }: { regions: RegionCardData[] }) {
                 <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground group-hover:text-foreground">Open <ArrowUpRight className="size-3.5" /></span>
               </div>
             </Link>
+            </motion.div>
           ))}
-        </div>
+          </AnimatePresence>
+        </motion.div>
       ) : (
         <div className="mt-6 rounded-2xl border border-dashed border-border bg-card p-10 text-center">
           <p className="font-semibold">No state, capital or athlete matches your search.</p>

@@ -5,6 +5,7 @@ import "./globals.css"
 import { SiteHeader } from "@/components/site/site-header"
 import { SiteFooter } from "@/components/site/site-footer"
 import { buildSearchIndex } from "@/lib/search-index"
+import { MotionProvider, SpotlightTracker } from "@/components/motion/motion-primitives"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
 const bricolage = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage", display: "swap" })
@@ -56,9 +57,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-card focus:px-4 focus:py-2 focus:shadow-lg">
           Skip to content
         </a>
-        <SiteHeader searchItems={searchItems} />
-        <main id="main">{children}</main>
-        <SiteFooter />
+        <MotionProvider>
+          <SiteHeader searchItems={searchItems} />
+          <main id="main">{children}</main>
+          <SiteFooter />
+        </MotionProvider>
+        <SpotlightTracker />
       </body>
     </html>
   )

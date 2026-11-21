@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { AnimatePresence, motion } from "motion/react"
 import { ChevronDown, Menu, Search, X } from "lucide-react"
 import { INDIA_REGIONS, type ZoneType } from "@/lib/india-sports-data"
 import { ThemeToggle } from "@/components/site/theme-toggle"
@@ -22,6 +23,8 @@ export function SiteHeader({ searchItems }: { searchItems: SearchItem[] }) {
   const [statesOpen, setStatesOpen] = React.useState(false)
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const [searchOpen, setSearchOpen] = React.useState(false)
+  const [initialQuery, setInitialQuery] = React.useState("")
+  const [scrolled, setScrolled] = React.useState(false)
   const statesRef = React.useRef<HTMLDivElement>(null)
 
   // Close menus whenever the route changes.
@@ -38,6 +41,7 @@ export function SiteHeader({ searchItems }: { searchItems: SearchItem[] }) {
       }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault()
+        setInitialQuery("")
         setSearchOpen(true)
       }
       if (event.key === "/" && !(event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement)) {
@@ -48,7 +52,7 @@ export function SiteHeader({ searchItems }: { searchItems: SearchItem[] }) {
     function onClick(event: MouseEvent) {
       if (statesRef.current && !statesRef.current.contains(event.target as Node)) setStatesOpen(false)
     }
-    const openSearch = () => setSearchOpen(true)
+    const openSearch = (event: Event) => { setInitialQuery(typeof (event as CustomEvent).detail === "string" ? (event as CustomEvent).detail : ""); setSearchOpen(true) }
     document.addEventListener("keydown", onKey)
     document.addEventListener("mousedown", onClick)
     window.addEventListener("insr:open-search", openSearch)
@@ -57,6 +61,13 @@ export function SiteHeader({ searchItems }: { searchItems: SearchItem[] }) {
       document.removeEventListener("mousedown", onClick)
       window.removeEventListener("insr:open-search", openSearch)
     }
+  }, [])
+
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8)
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
   const byZone = ZONE_ORDER.map((zone) => ({
@@ -70,7 +81,7 @@ export function SiteHeader({ searchItems }: { searchItems: SearchItem[] }) {
   return (
     <header className="sticky top-0 z-40">
       <div className="tricolor-rule" aria-hidden="true" />
-      <div className="border-b border-border bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70">
+      <div className={"border-b bg-background/85 backdrop-blur-xl transition-[box-shadow,border-color] duration-300 supports-[backdrop-filter]:bg-background/70 " + (scrolled ? "border-border shadow-[0_8px_30px_-12px_rgb(15_23_42/0.18)]" : "border-transparent")}>
         <div className="site-container flex h-16 items-center gap-4">
           <Link href="/" className="flex items-center gap-2.5" aria-label="Indian National Sports Repository, home">
             <BrandMark />
@@ -92,10 +103,11 @@ export function SiteHeader({ searchItems }: { searchItems: SearchItem[] }) {
               >
                 States &amp; UTs
                 <ChevronDown className={"size-4 transition " + (statesOpen ? "rotate-180" : "")} />
-                {statesActive && <span className="absolute inset-x-3 -bottom-[13px] h-0.5 rounded-full bg-saffron" />}
+                {statesActive && <motion.span layoutId="nav-underline" className="absolute inset-x-3 -bottom-[13px] h-0.5 rounded-full bg-saffron" />}
               </button>
+              <AnimatePresence>
               {statesOpen && (
-                <div id="states-menu" className="absolute left-1/2 top-full mt-3 w-[min(92vw,960px)] -translate-x-1/2 rounded-2xl border border-border bg-popover p-6 shadow-2xl shadow-black/10 animate-in fade-in-0 zoom-in-95">
+                <motion.div id="states-menu" initial={{ opacity: 0, y: -8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -6, scale: 0.98, transition: { duration: 0.12 } }} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute left-1/2 top-full mt-3 w-[min(92vw,960px)] rounded-2xl border border-border bg-popover p-6 shadow-2xl shadow-black/10" style={{ x: "-50%" }}>
                   <div className="mb-4 flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">28 states and 8 union territories</p>
                     <Link href="/states" className="text-sm font-semibold text-saffron hover:underline">View all with filters →</Link>
@@ -116,8 +128,9 @@ export function SiteHeader({ searchItems }: { searchItems: SearchItem[] }) {
                       </div>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               )}
+              </AnimatePresence>
             </div>
             {NAV.slice(1).map((item) => (
               <NavLink key={item.href} href={item.href} active={isActive(item.href)}>{item.label}</NavLink>
@@ -176,7 +189,7 @@ export function SiteHeader({ searchItems }: { searchItems: SearchItem[] }) {
           </div>
         )}
       </div>
-      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} items={searchItems} />
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} items={searchItems} initialQuery={initialQuery} />
     </header>
   )
 }
@@ -189,7 +202,7 @@ function NavLink({ href, active, children }: { href: string; active: boolean; ch
       className={"relative rounded-lg px-3 py-2 text-sm font-medium transition " + (active ? "text-foreground" : "text-muted-foreground hover:text-foreground")}
     >
       {children}
-      {active && <span className="absolute inset-x-3 -bottom-[13px] h-0.5 rounded-full bg-saffron" />}
+      {active && <motion.span layoutId="nav-underline" className="absolute inset-x-3 -bottom-[13px] h-0.5 rounded-full bg-saffron" />}
     </Link>
   )
 }

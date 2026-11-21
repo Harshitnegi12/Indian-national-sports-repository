@@ -1,0 +1,13 @@
+// Types for @svg-maps/india, whose own typings point at a package that isn't installed.
+declare module "svg-maps__common" {
+  export interface Location {
+    id: string
+    name: string
+    path: string
+  }
+  export interface Map {
+    label: string
+    viewBox: string
+    locations: Location[]
+  }
+}

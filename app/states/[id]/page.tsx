@@ -18,6 +18,8 @@ import { RegionAthletes } from "@/components/region/region-athletes"
 import { PlayerCorner } from "@/components/region/player-corner"
 import { AthleteAvatar, TierBadge } from "@/components/site/athlete-card"
 import { SectionHeading } from "@/components/site/section-heading"
+import { SectionNav } from "@/components/region/section-nav"
+import { AnimatedNumber, Reveal, Stagger, StaggerItem } from "@/components/motion/motion-primitives"
 
 export function generateStaticParams() {
   return INDIA_REGIONS.map((region) => ({ id: region.id }))
@@ -103,7 +105,7 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
         </p>
         <div className="absolute inset-x-0 bottom-0 h-1" style={{ background: meta.accent }} aria-hidden="true" />
         <div className="site-container relative grid gap-10 py-14 sm:py-20 lg:grid-cols-[1.4fr_1fr] lg:items-end">
-          <div>
+          <Reveal y={24}>
             <p className="flex flex-wrap items-center gap-2 text-sm text-hero-muted">
               <span className="rounded-md border border-white/15 bg-white/5 px-2 py-0.5 font-mono text-xs text-white/80">{region.code}</span>
               {region.type} · {region.zone} zone
@@ -113,52 +115,48 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
             <p className="mt-6 text-xl font-semibold text-[color-mix(in_oklch,var(--accent-region)_45%,white)]">{headline}</p>
             <p className="mt-3 max-w-2xl text-base leading-7 text-hero-muted">{intro}</p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a href="#athletes" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
-                See all {athletes.length || ""} athletes <ArrowRight className="size-4" />
+              <a href="#athletes" className="pressable group inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-black/20 hover:bg-slate-100">
+                See all {athletes.length || ""} athletes <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </a>
-              <a href="#player-corner" className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+              <a href="#player-corner" className="pressable inline-flex items-center gap-2 rounded-xl border border-white/20 px-5 py-3 text-sm font-semibold text-white hover:border-white/40 hover:bg-white/10">
                 I&apos;m an athlete
               </a>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+          </Reveal>
+          <Stagger className="grid grid-cols-2 gap-3" gap={0.08}>
             {[
               [athletes.length, "Athletes listed"],
               [medallists, "Olympic & Para medallists"],
               [sportCounts.length, "Sports"],
               [hasRegionalAcademies(id) ? extras.academies.length : "–", "Academies"],
             ].map(([value, label]) => (
-              <div key={String(label)} className="rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur">
-                <p className="font-display text-4xl font-bold text-white">{value}</p>
-                <p className="mt-1 text-sm text-hero-muted">{label}</p>
-              </div>
+              <StaggerItem key={String(label)}>
+                <div className="h-full rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur transition hover:border-white/25 hover:bg-white/[0.08]">
+                  <p className="font-display text-4xl font-bold text-white"><AnimatedNumber value={value} /></p>
+                  <p className="mt-1 text-sm text-hero-muted">{label}</p>
+                </div>
+              </StaggerItem>
             ))}
-            <div className="col-span-2 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-4 text-sm text-hero-muted">
-              <MapPin className="size-4 shrink-0" /> Capital: <span className="font-medium text-white">{region.capital}</span>
-            </div>
-          </div>
+            <StaggerItem className="col-span-2">
+              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-4 text-sm text-hero-muted">
+                <MapPin className="size-4 shrink-0" /> Capital: <span className="font-medium text-white">{region.capital}</span>
+              </div>
+            </StaggerItem>
+          </Stagger>
         </div>
       </section>
 
-      {/* Section navigation */}
-      <div className="sticky top-[67px] z-30 border-b border-border bg-background/85 backdrop-blur-xl">
-        <nav aria-label="On this page" className="site-container no-scrollbar flex gap-1 overflow-x-auto py-2">
-          {sections.map((section) => (
-            <a key={section.id} href={"#" + section.id} className="shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground">
-              {section.label}
-            </a>
-          ))}
-        </nav>
-      </div>
+      <SectionNav sections={sections} accent={meta.accent} />
 
       {/* Champions */}
       {champions.length > 0 && (
         <section id="champions" className="site-container scroll-mt-32 pt-16">
-          <SectionHeading eyebrow="Champions" title={`Pride of ${region.name}`} text="Medallists and headline athletes from this region." />
-          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Reveal><SectionHeading eyebrow="Champions" title={`Pride of ${region.name}`} text="Medallists and headline athletes from this region." /></Reveal>
+          <Stagger className="snap-rail no-scrollbar -mx-4 mt-8 flex gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 lg:grid-cols-3">
             {champions.map((athlete) => (
-              <Link key={athlete.id} href={"/athletes/" + athlete.id} className="group card-lift relative overflow-hidden rounded-2xl border border-border bg-card p-6">
-                <div className="absolute inset-y-0 left-0 w-1" style={{ background: meta.accent }} />
+              <StaggerItem key={athlete.id} className="w-[82%] shrink-0 sm:w-[60%] md:w-auto">
+              <Link href={"/athletes/" + athlete.id} className="group spotlight card-lift pressable relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-6" style={{ ["--accent-card" as string]: meta.accent }}>
+                <div className="absolute inset-y-0 left-0 w-1 transition-all duration-300 group-hover:w-1.5" style={{ background: meta.accent }} />
                 <div className="flex items-center gap-4">
                   <AthleteAvatar name={athlete.name} accent={meta.accent} size="lg" />
                   <div className="min-w-0">
@@ -167,23 +165,24 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
                   </div>
                 </div>
                 <p className="mt-4 text-sm leading-6 text-foreground/85">{athlete.highlights[0]}</p>
-                <div className="mt-4 flex items-center justify-between">
+                <div className="mt-auto flex items-center justify-between pt-4">
                   <TierBadge tier={athlete.tier} />
                   {athlete.hometown && <span className="truncate pl-3 text-xs text-muted-foreground">{athlete.hometown}</span>}
                 </div>
               </Link>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </section>
       )}
 
       {/* All athletes */}
       <section id="athletes" className="site-container scroll-mt-32 pt-16">
-        <SectionHeading
+        <Reveal><SectionHeading
           eyebrow="Athletes"
           title={`All athletes from ${region.name}`}
           text={athletes.length ? "Filter by sport, search by name or hometown, and open any card for the full profile and sources." : undefined}
-        />
+        /></Reveal>
         <div className="mt-8">
           {athletes.length ? (
             <RegionAthletes
@@ -211,31 +210,31 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
       {/* Districts */}
       {extras.districts?.length ? (
         <section id="districts" className="site-container scroll-mt-32 pt-20">
-          <SectionHeading eyebrow="Districts" title="Where the champions come from" text="District by district: the sports each area is known for and the athletes it produced." />
-          <div className="mt-8 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+          <Reveal><SectionHeading eyebrow="Districts" title="Where the champions come from" text="District by district: the sports each area is known for and the athletes it produced." /></Reveal>
+          <Stagger className="mt-8 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
             {extras.districts.map((district) => (
-              <div key={district.name} className="bg-card p-6">
+              <StaggerItem key={district.name} className="group bg-card p-6 transition-colors hover:bg-muted/50">
                 <p className="eyebrow" style={{ color: meta.accent }}>{district.sports}</p>
                 <h3 className="mt-2 text-xl font-bold">{district.name}</h3>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">{district.athletes}</p>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </section>
       ) : null}
 
       {/* Facts */}
       {extras.facts?.length ? (
         <section id="facts" className="site-container scroll-mt-32 pt-20">
-          <SectionHeading eyebrow="Did you know" title={`${region.name} in numbers and firsts`} />
-          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Reveal><SectionHeading eyebrow="Did you know" title={`${region.name} in numbers and firsts`} /></Reveal>
+          <Stagger className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {extras.facts.map((fact) => (
-              <article key={fact.title} className="rounded-2xl border border-border bg-card p-6">
+              <StaggerItem key={fact.title}><article className="spotlight card-lift h-full rounded-2xl border border-border bg-card p-6" style={{ ["--accent-card" as string]: meta.accent }}>
                 <p className="font-display text-2xl font-bold" style={{ color: meta.accent }}>{fact.title}</p>
                 <p className="mt-2 text-sm leading-6 text-foreground/80">{fact.text}</p>
-              </article>
+              </article></StaggerItem>
             ))}
-          </div>
+          </Stagger>
           {extras.quotes && extras.quotes.length > 1 && (
             <div className="mt-6 flex flex-wrap gap-3">
               {extras.quotes.map((quote) => (
@@ -248,16 +247,16 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
 
       {/* Academies */}
       <section id="academies" className="site-container scroll-mt-32 pt-20">
-        <SectionHeading
+        <Reveal><SectionHeading
           eyebrow="Academies"
           title={hasRegionalAcademies(id) ? "Where champions train" : "Training centres"}
           text={hasRegionalAcademies(id) ? `Sports centres, schools and clubs in ${region.name}. Official pages are linked where available.` : `Regional academy listings for ${region.name} haven't been added yet. Use these official national directories meanwhile.`}
-        />
-        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        /></Reveal>
+        <Stagger className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {extras.academies.map((academy) => (
-            <article key={academy.name} className="flex flex-col rounded-2xl border border-border bg-card p-6">
+            <StaggerItem key={academy.name}><article className="group spotlight card-lift flex h-full flex-col rounded-2xl border border-border bg-card p-6" style={{ ["--accent-card" as string]: meta.accent }}>
               <div className="flex items-start gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted"><Building2 className="size-5 text-foreground/70" /></span>
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted transition group-hover:scale-110 group-hover:bg-saffron/15"><Building2 className="size-5 text-foreground/70" /></span>
                 <div className="min-w-0">
                   <h3 className="font-bold leading-snug">{academy.name}</h3>
                   <p className="mt-0.5 text-xs text-muted-foreground">{academy.place}</p>
@@ -278,17 +277,17 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
                   <span className="text-xs text-muted-foreground">No official website found</span>
                 )}
               </div>
-            </article>
+            </article></StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </section>
 
       {/* Player Corner */}
       <section id="player-corner" className="site-container scroll-mt-32 pt-20">
-        <SectionHeading eyebrow="Player Corner" title={`Athlete from ${region.name}?`} text="Create your athlete card. When public sign-up opens, verified cards can be added to this page." />
-        <div className="mt-8">
+        <Reveal><SectionHeading eyebrow="Player Corner" title={`Athlete from ${region.name}?`} text="Create your athlete card. When public sign-up opens, verified cards can be added to this page." /></Reveal>
+        <Reveal className="mt-8">
           <PlayerCorner regionId={id} regionName={region.name} sports={playerSports} accent={meta.accent} />
-        </div>
+        </Reveal>
       </section>
 
       {/* Sources and nearby */}

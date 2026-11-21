@@ -21,7 +21,7 @@ function score(item: SearchItem, query: string) {
   return -1
 }
 
-export function SearchDialog({ open, onOpenChange, items }: { open: boolean; onOpenChange: (open: boolean) => void; items: SearchItem[] }) {
+export function SearchDialog({ open, onOpenChange, items, initialQuery = "" }: { open: boolean; onOpenChange: (open: boolean) => void; items: SearchItem[]; initialQuery?: string }) {
   const router = useRouter()
   const [query, setQuery] = React.useState("")
   const [active, setActive] = React.useState(0)
@@ -30,7 +30,7 @@ export function SearchDialog({ open, onOpenChange, items }: { open: boolean; onO
 
   React.useEffect(() => {
     if (open) {
-      setQuery("")
+      setQuery(initialQuery)
       setActive(0)
       const id = requestAnimationFrame(() => inputRef.current?.focus())
       document.body.style.overflow = "hidden"
@@ -39,7 +39,7 @@ export function SearchDialog({ open, onOpenChange, items }: { open: boolean; onO
         document.body.style.overflow = ""
       }
     }
-  }, [open])
+  }, [open, initialQuery])
 
   const results = React.useMemo(() => {
     const q = query.trim().toLowerCase()

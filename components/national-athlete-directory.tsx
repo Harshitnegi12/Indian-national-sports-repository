@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useSearchParams } from "next/navigation"
+import { AnimatePresence, motion } from "motion/react"
 import { Search, X } from "lucide-react"
 import { AthleteCard } from "@/components/site/athlete-card"
 import { ATHLETES, compareAthletes, getRegionName, getSportCategory, isMedallist } from "@/lib/athlete-data"
@@ -63,9 +64,22 @@ export function NationalAthleteDirectory({ accents }: { accents: Record<string, 
       </div>
 
       {filtered.length ? (
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((athlete) => <AthleteCard key={athlete.id} athlete={athlete} showRegion accent={accents[athlete.regionId]} />)}
-        </div>
+        <motion.div layout className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <AnimatePresence mode="popLayout" initial={false}>
+            {filtered.map((athlete) => (
+              <motion.div
+                key={athlete.id}
+                layout
+                initial={{ opacity: 0, scale: 0.94, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.15 } }}
+                transition={{ type: "spring", stiffness: 380, damping: 34, mass: 0.7 }}
+              >
+                <AthleteCard athlete={athlete} showRegion accent={accents[athlete.regionId]} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       ) : (
         <div className="mt-6 rounded-2xl border border-dashed border-border bg-card p-10 text-center">
           <p className="font-semibold">No athletes match these filters.</p>

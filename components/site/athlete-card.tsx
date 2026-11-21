@@ -32,7 +32,7 @@ export function AthleteAvatar({ name, accent, size = "md" }: { name: string; acc
   return (
     <span
       aria-hidden="true"
-      className={"flex shrink-0 items-center justify-center rounded-xl font-display font-bold text-white " + (size === "lg" ? "size-14 text-lg" : "size-11 text-sm")}
+      className={"flex shrink-0 items-center justify-center rounded-xl font-display font-bold text-white shadow-sm transition duration-300 group-hover:-rotate-3 group-hover:scale-105 " + (size === "lg" ? "size-14 text-lg" : "size-11 text-sm")}
       style={{ background: `linear-gradient(135deg, ${accent ?? "#13234A"}, color-mix(in oklch, ${accent ?? "#13234A"} 55%, #0B1120))` }}
     >
       {getInitials(name)}
@@ -45,7 +45,8 @@ export function AthleteCard({ athlete, accent, showRegion = false }: { athlete: 
   return (
     <Link
       href={"/athletes/" + athlete.id}
-      className="group card-lift flex h-full flex-col rounded-2xl border border-border bg-card p-5"
+      className="group spotlight card-lift pressable flex h-full flex-col rounded-2xl border border-border bg-card p-5"
+      style={{ ["--accent-card" as string]: accent }}
     >
       <div className="flex items-start justify-between gap-3">
         <AthleteAvatar name={athlete.name} accent={accent} />
