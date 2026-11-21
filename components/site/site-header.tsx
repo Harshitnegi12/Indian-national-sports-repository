@@ -15,6 +15,7 @@ const ZONE_ORDER: ZoneType[] = ["North", "North-East", "East", "Central", "West"
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/athletes", label: "Athletes" },
+  { href: "/sports", label: "Sports" },
   { href: "/data-notes", label: "Data notes" },
 ]
 

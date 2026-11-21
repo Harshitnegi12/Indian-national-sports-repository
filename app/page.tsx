@@ -135,7 +135,7 @@ export default function HomePage() {
             {sportCounts.map(({ sport, slug, count }) => (
               <StaggerItem key={slug}>
               <Link
-                href={"/athletes?sport=" + encodeURIComponent(sport)}
+                href={"/sports/" + slug}
                 className="group spotlight card-lift pressable flex h-full items-center justify-between gap-3 rounded-xl border border-border bg-background px-4 py-3.5"
               >
                 <span className="min-w-0">
