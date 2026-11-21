@@ -44,7 +44,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-border">
         <div className="site-container flex flex-col gap-2 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>Details should be confirmed against the linked primary record. Player Corner sign-in is a demo and stays in your browser. Map: svg-maps/india, CC BY 4.0.</p>
+          <p>Details should be confirmed against the linked primary record. Player Corner sign-in is a demo and stays in your browser. Map data: DataMeet, CC BY 4.0.</p>
           <div className="tricolor-rule w-16 rounded-full" aria-hidden="true" />
         </div>
       </div>

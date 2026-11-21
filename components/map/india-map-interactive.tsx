@@ -143,7 +143,7 @@ export function IndiaMapInteractive({ regions, children }: { regions: MapRegionI
         <span className="whitespace-nowrap">Fewer athletes</span>
         <span className="h-1.5 w-24 rounded-full" style={{ background: "linear-gradient(90deg in oklch, var(--map-low), var(--map-high))" }} />
         <span>More</span>
-        <span className="ml-auto hidden sm:inline">Boundaries are indicative</span>
+        
       </div>
     </div>
   )

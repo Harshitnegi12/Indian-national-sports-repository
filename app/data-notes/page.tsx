@@ -62,10 +62,9 @@ export default function DataNotesPage() {
           This is an independent community project, not an official government service. Details should be confirmed against the linked primary record.
         </p>
         <p className="mt-3 text-xs leading-6 text-muted-foreground">
-          Map shapes adapted from{" "}
-          <a href="https://github.com/VictorCazanave/svg-maps" target="_blank" rel="noopener noreferrer" className="underline">svg-maps/india</a>{" "}
-          by Victor Cazanave (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" className="underline">CC BY 4.0</a>),
-          with Jammu and Kashmir and Ladakh shown as separate union territories using an approximate dividing line. Boundaries are indicative only.
+          Map boundaries from the{" "}
+          <a href="https://github.com/datameet/maps" target="_blank" rel="noopener noreferrer" className="underline">DataMeet India maps</a>{" "}
+          States dataset (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" className="underline">CC BY 4.0</a>), showing India&apos;s official boundaries with 28 states and 8 union territories. Shapes are simplified for the web.
         </p>
       </div>
     </>
