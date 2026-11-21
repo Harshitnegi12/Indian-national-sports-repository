@@ -10,6 +10,7 @@ import { AnimatedNumber, Reveal, Stagger, StaggerItem, WordReveal } from "@/comp
 import { SearchLauncher, SearchSuggestion } from "@/components/site/search-launcher"
 import { AthleteCard } from "@/components/site/athlete-card"
 import { SectionHeading } from "@/components/site/section-heading"
+import { TodayInSport } from "@/components/site/today-in-sport"
 
 const ZONES: { zone: ZoneType; blurb: string }[] = [
   { zone: "North", blurb: "Akhadas, boxing rings and shooting ranges" },
@@ -109,6 +110,9 @@ export default function HomePage() {
           </Reveal>
         </div>
       </section>
+
+      {/* Aaj ka din */}
+      <section className="site-container pt-16"><Reveal><TodayInSport /></Reveal></section>
 
       {/* Champions */}
       <section className="site-container py-20">
