@@ -1,4 +1,4 @@
-import { INDIA_REGIONS } from "@/lib/india-sports-data"
+﻿import { INDIA_REGIONS } from "@/lib/india-sports-data"
 
 export interface AthleteSource {
   label: string
@@ -227,7 +227,7 @@ export const ATHLETES: AthleteRecord[] = [
     ],
   },
   {
-    id: "manika-batra", name: "Manika Batra", regionId: "delhi",
+    id: "manika-batra", name: "Manika Batra", regionId: "delhi-nct",
     sport: "Table tennis · Singles",
     summary: "Indian table tennis player listed for Delhi by the Ministry of Youth Affairs and Sports.",
     highlights: ["Won two gold medals at the 2018 Commonwealth Games.", "Represented India at the Tokyo 2020 and Paris 2024 Olympic Games."],
