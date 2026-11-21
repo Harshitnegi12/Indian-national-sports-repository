@@ -5,10 +5,11 @@ import { useSearchParams } from "next/navigation"
 import { AnimatePresence, motion } from "motion/react"
 import { Search, X } from "lucide-react"
 import { AthleteCard } from "@/components/site/athlete-card"
-import { ATHLETES, compareAthletes, getRegionName, getSportCategory, isMedallist } from "@/lib/athlete-data"
+import type { AthleteRecord } from "@/lib/athlete-data"
+import { compareAthletes, getRegionName, getSportCategory, isMedallist } from "@/lib/athlete-utils"
 import { REGIONS_SORTED } from "@/lib/region-meta"
 
-export function NationalAthleteDirectory({ accents }: { accents: Record<string, string> }) {
+export function NationalAthleteDirectory({ athletes: ATHLETES, accents }: { athletes: AthleteRecord[]; accents: Record<string, string> }) {
   const params = useSearchParams()
   const [query, setQuery] = React.useState(params.get("q") ?? "")
   const [sport, setSport] = React.useState(params.get("sport") ?? "all")
@@ -18,7 +19,7 @@ export function NationalAthleteDirectory({ accents }: { accents: Record<string, 
   const [limit, setLimit] = React.useState(48)
   React.useEffect(() => setLimit(48), [query, sport, region, medalOnly, sort])
 
-  const sports = React.useMemo(() => Array.from(new Set(ATHLETES.map((athlete) => getSportCategory(athlete)))).sort(), [])
+  const sports = React.useMemo(() => Array.from(new Set(ATHLETES.map((athlete) => getSportCategory(athlete)))).sort(), [ATHLETES])
 
   const filtered = React.useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -27,7 +28,7 @@ export function NationalAthleteDirectory({ accents }: { accents: Record<string, 
       .filter((athlete) => !medalOnly || isMedallist(athlete))
       .filter((athlete) => !q || [athlete.name, athlete.sport, athlete.hometown ?? "", getRegionName(athlete.regionId)].join(" ").toLowerCase().includes(q))
       .sort(sort === "name" ? (a, b) => a.name.localeCompare(b.name) : compareAthletes)
-  }, [query, sport, region, medalOnly, sort])
+  }, [ATHLETES, query, sport, region, medalOnly, sort])
 
   const select = "h-11 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-ring"
 

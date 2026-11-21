@@ -6,9 +6,8 @@ import {
   getRegionName,
   getSportCategory,
   getSportEvent,
-  type AthleteRecord,
-  type AthleteTier,
-} from "@/lib/athlete-data"
+} from "@/lib/athlete-utils"
+import type { AthleteRecord, AthleteTier } from "@/lib/athlete-data"
 
 const TIER_STYLE: Record<AthleteTier, string> = {
   "olympic-medal": "bg-gold/15 text-[color-mix(in_oklch,var(--gold)_70%,var(--foreground))] ring-gold/30",
@@ -28,7 +27,13 @@ export function TierBadge({ tier }: { tier?: AthleteTier }) {
   )
 }
 
-export function AthleteAvatar({ name, accent, size = "md" }: { name: string; accent?: string; size?: "md" | "lg" }) {
+export function AthleteAvatar({ name, accent, size = "md", photo }: { name: string; accent?: string; size?: "md" | "lg"; photo?: string }) {
+  if (photo) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={photo} alt="" loading="lazy" className={"shrink-0 rounded-xl object-cover object-top shadow-sm ring-1 ring-border transition duration-300 group-hover:scale-105 " + (size === "lg" ? "size-14" : "size-11")} />
+    )
+  }
   return (
     <span
       aria-hidden="true"
@@ -49,7 +54,7 @@ export function AthleteCard({ athlete, accent, showRegion = false }: { athlete: 
       style={{ ["--accent-card" as string]: accent }}
     >
       <div className="flex items-start justify-between gap-3">
-        <AthleteAvatar name={athlete.name} accent={accent} />
+        <AthleteAvatar name={athlete.name} accent={accent} photo={athlete.photo} />
         <TierBadge tier={athlete.tier} />
       </div>
       <h3 className="mt-4 text-lg font-bold leading-snug group-hover:text-saffron">{athlete.name}</h3>

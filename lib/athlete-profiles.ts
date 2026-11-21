@@ -14,8 +14,12 @@ export interface AthleteProfile {
 
 const PROFILES = profiles as Record<string, AthleteProfile>
 
+const decode = (s?: string) => s?.replace(/&amp;/g, "&").replace(/&quot;/g, "\"").replace(/&#0?39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/[ \t]{2,}/g, " ")
+
 export function getAthleteProfile(id: string): AthleteProfile | undefined {
-  return PROFILES[id]
+  const p = PROFILES[id]
+  if (!p) return undefined
+  return { ...p, story: decode(p.story), image: p.image ? { ...p.image, credit: decode(p.image.credit) } : undefined }
 }
 
 export function formatBorn(born?: string) {

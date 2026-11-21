@@ -4,7 +4,8 @@ import * as React from "react"
 import { AnimatePresence, LayoutGroup, motion } from "motion/react"
 import { Search, X } from "lucide-react"
 import { AthleteCard } from "@/components/site/athlete-card"
-import { compareAthletes, getSportCategory, type AthleteRecord } from "@/lib/athlete-data"
+import type { AthleteRecord } from "@/lib/athlete-data"
+import { compareAthletes, getSportCategory } from "@/lib/athlete-utils"
 
 type Sort = "achievement" | "name"
 

@@ -166,7 +166,7 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
               <Link href={"/athletes/" + athlete.id} className="group spotlight card-lift pressable relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-6" style={{ ["--accent-card" as string]: meta.accent }}>
                 <div className="absolute inset-y-0 left-0 w-1 transition-all duration-300 group-hover:w-1.5" style={{ background: meta.accent }} />
                 <div className="flex items-center gap-4">
-                  <AthleteAvatar name={athlete.name} accent={meta.accent} size="lg" />
+                  <AthleteAvatar name={athlete.name} accent={meta.accent} size="lg" photo={athlete.photo} />
                   <div className="min-w-0">
                     <p className="truncate font-display text-xl font-bold group-hover:text-saffron">{athlete.name}</p>
                     <p className="truncate text-sm text-muted-foreground">{athlete.sport}</p>
