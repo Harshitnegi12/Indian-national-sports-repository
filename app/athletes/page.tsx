@@ -1,6 +1,28 @@
-import { InsrHeader } from "@/components/insr-header"
+import type { Metadata } from "next"
+import { Suspense } from "react"
+import { INDIA_REGIONS } from "@/lib/india-sports-data"
+import { ATHLETES } from "@/lib/athlete-data"
+import { getRegionMeta } from "@/lib/region-meta"
 import { NationalAthleteDirectory } from "@/components/national-athlete-directory"
+import { PageHero } from "@/components/site/page-hero"
+
+export const metadata: Metadata = { title: "Athletes across India" }
 
 export default function AthletesDirectoryPage() {
-  return <div className="min-h-screen bg-background/40 text-foreground"><InsrHeader /><main className="min-h-[75vh]"><div className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8"><p className="text-xs font-bold uppercase tracking-[0.18em] text-india-green">National directory</p><h1 className="mt-2 text-4xl font-extrabold tracking-tight text-ashoka-navy">Athletes across India</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">Find listed athletes by name, sport, and region, then open their sourced individual profile.</p></div><NationalAthleteDirectory /></main></div>
+  const accents = Object.fromEntries(INDIA_REGIONS.map((region) => [region.id, getRegionMeta(region).accent]))
+  return (
+    <>
+      <PageHero
+        eyebrow="National directory"
+        title="Athletes across India"
+        hindi="भारत के खिलाड़ी"
+        text={`${ATHLETES.length} athletes from every corner of the country. Filter by sport or state, or show only Olympic and Paralympic medallists.`}
+      />
+      <div className="site-container py-10">
+        <Suspense fallback={<p className="text-sm text-muted-foreground">Loading athletes…</p>}>
+          <NationalAthleteDirectory accents={accents} />
+        </Suspense>
+      </div>
+    </>
+  )
 }

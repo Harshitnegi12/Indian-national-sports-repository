@@ -1,10 +1,18 @@
 ﻿import { INDIA_REGIONS } from "@/lib/india-sports-data"
+import { HARYANA_ATHLETES, HARYANA_ENRICHMENT } from "@/lib/data/haryana"
 
 export interface AthleteSource {
   label: string
   url: string
 }
 
+/** Highest level of achievement, used for badges and for sorting champions first. */
+export type AthleteTier = "olympic-medal" | "paralympic-medal" | "world-champion" | "international" | "national"
+
+/**
+ * One athlete. Any number of athletes can share a region and sport.
+ * `sport` is "Category · Event", e.g. "Athletics · Javelin throw"; the category must be in SPORT_CATEGORIES.
+ */
 export interface AthleteRecord {
   id: string
   name: string
@@ -13,9 +21,17 @@ export interface AthleteRecord {
   summary: string
   highlights: string[]
   sources: AthleteSource[]
+  /** Village, town or district, e.g. "Khandra, Panipat". */
+  hometown?: string
+  tier?: AthleteTier
+  /** Shown in the "Champions" strip of the region page and on the home page. */
+  featured?: boolean
+  /** Only used by enrichment maps: appended to highlights / sources. */
+  extraHighlights?: string[]
+  extraSources?: AthleteSource[]
 }
 
-export const ATHLETES: AthleteRecord[] = [
+const BASE_ATHLETES: AthleteRecord[] = [
   {
     id: "neeraj-chopra", name: "Neeraj Chopra", regionId: "haryana",
     sport: "Athletics · Javelin throw",
@@ -459,6 +475,70 @@ export const ATHLETES: AthleteRecord[] = [
     ],
   },
 ]
+
+const ENRICHMENT: Record<string, Partial<AthleteRecord>> = {
+  ...HARYANA_ENRICHMENT,
+}
+
+function enrich(athlete: AthleteRecord): AthleteRecord {
+  const extra = ENRICHMENT[athlete.id]
+  if (!extra) return athlete
+  const { extraHighlights, extraSources, ...rest } = extra
+  return {
+    ...athlete,
+    ...rest,
+    highlights: [...athlete.highlights, ...(extraHighlights ?? [])],
+    sources: [...athlete.sources, ...(extraSources ?? [])],
+  }
+}
+
+const MEDAL = /\b(gold|silver|bronze|medal|champion)\b/i
+const OLYMPIC = /\bOlympic|Olympics\b/i
+
+/** Uses the explicit tier, otherwise reads it from a single highlight that names both a medal and the Games. */
+export function getAthleteTier(athlete: AthleteRecord): AthleteTier | undefined {
+  if (athlete.tier) return athlete.tier
+  for (const line of athlete.highlights) {
+    if (/Paralympic/i.test(line) && MEDAL.test(line)) return "paralympic-medal"
+  }
+  for (const line of athlete.highlights) {
+    if (OLYMPIC.test(line) && !/Youth|Winter/i.test(line) && MEDAL.test(line)) return "olympic-medal"
+  }
+  return undefined
+}
+
+const seen = new Set<string>()
+export const ATHLETES: AthleteRecord[] = [...BASE_ATHLETES, ...HARYANA_ATHLETES]
+  .filter((athlete) => (seen.has(athlete.id) ? false : (seen.add(athlete.id), true)))
+  .map(enrich)
+  .map((athlete) => ({ ...athlete, tier: getAthleteTier(athlete) }))
+
+export const TIER_LABEL: Record<AthleteTier, string> = {
+  "olympic-medal": "Olympic medallist",
+  "paralympic-medal": "Paralympic medallist",
+  "world-champion": "World champion",
+  international: "International",
+  national: "National",
+}
+
+const TIER_RANK: Record<AthleteTier, number> = {
+  "olympic-medal": 0,
+  "paralympic-medal": 1,
+  "world-champion": 2,
+  international: 3,
+  national: 4,
+}
+
+export function compareAthletes(a: AthleteRecord, b: AthleteRecord) {
+  const ra = a.tier ? TIER_RANK[a.tier] : 9
+  const rb = b.tier ? TIER_RANK[b.tier] : 9
+  return ra - rb || a.name.localeCompare(b.name)
+}
+
+export function isMedallist(athlete: AthleteRecord) {
+  return athlete.tier === "olympic-medal" || athlete.tier === "paralympic-medal"
+}
+
 export function getAthleteById(id: string) {
   return ATHLETES.find((athlete) => athlete.id === id)
 }
@@ -494,5 +574,36 @@ export const SPORT_CATEGORIES = [
   "Alpine skiing", "Archery", "Athletics", "Badminton", "Basketball", "Boxing", "Cricket",
   "Football", "Hockey", "Ice hockey", "Kabaddi", "Shooting", "Sepaktakraw", "Squash", "Swimming", "Table tennis",
   "Tennis", "Volleyball", "Weightlifting", "Wrestling", "Gymnastics", "Para athletics",
-  "Para badminton", "Para shooting", "Para table tennis",
+  "Para badminton", "Para shooting", "Para table tennis", "Para archery",
 ]
+
+/** Sport names in Devanagari. */
+export const SPORT_HINDI: Record<string, string> = {
+  "Alpine skiing": "अल्पाइन स्कीइंग", Archery: "तीरंदाज़ी", Athletics: "एथलेटिक्स", Badminton: "बैडमिंटन",
+  Basketball: "बास्केटबॉल", Boxing: "मुक्केबाज़ी", Cricket: "क्रिकेट", Football: "फुटबॉल", Hockey: "हॉकी",
+  "Ice hockey": "आइस हॉकी", Kabaddi: "कबड्डी", Shooting: "निशानेबाज़ी", Sepaktakraw: "सेपक टकरॉ", Squash: "स्क्वैश",
+  Swimming: "तैराकी", "Table tennis": "टेबल टेनिस", Tennis: "टेनिस", Volleyball: "वॉलीबॉल", Weightlifting: "भारोत्तोलन",
+  Wrestling: "कुश्ती", Gymnastics: "जिम्नास्टिक्स", "Para athletics": "पैरा एथलेटिक्स", "Para badminton": "पैरा बैडमिंटन",
+  "Para shooting": "पैरा निशानेबाज़ी", "Para table tennis": "पैरा टेबल टेनिस", "Para archery": "पैरा तीरंदाज़ी",
+}
+
+export function getSportEvent(athlete: AthleteRecord) {
+  return athlete.sport.split("·")[1]?.trim() ?? ""
+}
+
+/** Sports that have at least one athlete, with counts, most athletes first. */
+export function getSportCounts(athletes: AthleteRecord[]) {
+  const counts = new Map<string, number>()
+  for (const athlete of athletes) {
+    const category = getSportCategory(athlete)
+    counts.set(category, (counts.get(category) ?? 0) + 1)
+  }
+  return [...counts.entries()]
+    .map(([sport, count]) => ({ sport, slug: getSportSlug(sport), count }))
+    .sort((a, b) => b.count - a.count || a.sport.localeCompare(b.sport))
+}
+
+export function getInitials(name: string) {
+  const parts = name.replace(/\./g, " ").trim().split(/\s+/)
+  return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase()
+}
