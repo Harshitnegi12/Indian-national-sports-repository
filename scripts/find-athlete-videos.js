@@ -15,6 +15,7 @@ const OFFICIAL = [
   "JioCinema", "JioHotstar", "DD Sports", "Doordarshan Sports", "Khelo India", "SAI Media", "World Table Tennis", "ITTF World",
   "FIDE chess", "Indian Super League", "Indian Football Team", "Commonwealth Sport", "Team India", "Olympic Khel", "IWF",
   "International Weightlifting Federation", "Tennis Channel", "Australian Open TV", "Wimbledon", "Asian Games", "PSA SQUASHTV",
+  "ESPNcricinfo", "ESPN India", "ESPN", "Sportstar", "Sports Tak", "PTI", "Press Trust of India", "ANI News", "NDTV", "NDTV Sports", "India Today", "Aaj Tak", "Times Now", "Hindustan Times", "The Indian Express", "The Hindu", "WION", "DD News", "Olympic Channel", "Star Sports India", "Sony LIV", "FanCode", "Hotstar", "Disney+ Hotstar", "BCCI TV", "England & Wales Cricket Board", "cricket.com.au", "Asian Football Confederation", "the-AFC", "Indian Football Team", "FIFA",
   "Sansad TV", "Prasar Bharati Archives", "DD National", "Doordarshan National", "All India Football Federation", "Indian Super League - ISL", "Kerala Blasters FC", "Bengaluru FC", "Mohun Bagan Super Giant", "East Bengal FC", "Mumbai Indians", "Chennai Super Kings", "Royal Challengers Bengaluru", "Kolkata Knight Riders", "Rajasthan Royals", "Delhi Capitals", "Punjab Kings", "Sunrisers Hyderabad", "Gujarat Titans", "Lucknow Super Giants", "IndianPremierLeague", "Wisden India", "Paralympics", "World Para Athletics", "Hockey India League", "Chess.com", "chess24", "Commonwealth Games", "Pro Kabaddi League",
 ]
 const isOfficial = (channel) => OFFICIAL.some((o) => channel.toLowerCase() === o.toLowerCase())
@@ -28,9 +29,11 @@ function topAthletes() {
     for (const m of read("lib/data/" + f).matchAll(/\["([^"]+)", "[a-z-]+", "([^"]+)", "[^"]*", "[^"]+", "([OPW])"/g)) list.set(slugify(m[1]), { name: m[1], sport: m[2] })
   }
   // Imported athletes who competed internationally
-  for (const row of JSON.parse(read("lib/data/athletes-wiki.json"))) {
+  // Internationals first, then everyone else
+  const wiki = JSON.parse(read("lib/data/athletes-wiki.json"))
+  for (const row of [...wiki.filter((r) => r.tier !== "national"), ...wiki.filter((r) => r.tier === "national")]) {
     const id = slugify(row.name)
-    if (!list.has(id) && row.tier !== "national") list.set(id, { name: row.name, sport: row.sport })
+    if (!list.has(id)) list.set(id, { name: row.name, sport: row.sport })
   }
   return [...list]
 }
@@ -59,15 +62,18 @@ async function main() {
   const outFile = path.join(root, "lib", "data", "athlete-videos.json")
   const result = fs.existsSync(outFile) ? JSON.parse(fs.readFileSync(outFile, "utf8")) : {}
   let done = 0
+  const tried = new Set()
   for (const [id, { name, sport }] of athletes) {
-    if (result[id]) continue
+    if (result[id] || tried.has(id)) continue
+    tried.add(id)
     if (++done % 100 === 0) fs.writeFileSync(outFile, JSON.stringify(result, null, 1))
     const q = `${name} ${sport.split("·")[0].trim()} highlights`
     try {
       const res = await fetch("https://www.youtube.com/results?hl=en&gl=IN&search_query=" + encodeURIComponent(q), { headers: { "User-Agent": "Mozilla/5.0", "Accept-Language": "en" } })
       const html = await res.text()
-      const surname = name.split(" ").pop().toLowerCase()
-      const candidates = parseResults(html).filter((v) => isOfficial(v.channel) && v.title.toLowerCase().includes(surname)).slice(0, 4)
+      // Every part of the name (ignoring initials) must appear in the title, so a common surname alone never matches.
+      const parts = name.toLowerCase().replace(/\./g, " ").split(/\s+/).filter((w) => w.length > 2)
+      const candidates = parseResults(html).filter((v) => isOfficial(v.channel) && parts.every((w) => v.title.toLowerCase().includes(w))).slice(0, 4)
       const verified = []
       for (const v of candidates) {
         const o = await fetch("https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent("https://www.youtube.com/watch?v=" + v.id))

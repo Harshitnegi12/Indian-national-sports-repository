@@ -179,11 +179,18 @@ export default async function AthletePage({ params }: { params: Promise<{ slug: 
                   ))}
                 </div>
               ) : (
-                <a href={youtubeSearch} target="_blank" rel="noopener noreferrer" className="group mt-5 flex aspect-video items-center justify-center rounded-xl border border-dashed border-border bg-muted/40 transition hover:border-red-500/50 hover:bg-red-500/5">
-                  <span className="text-center">
-                    <PlayCircle className="mx-auto size-12 text-red-600 transition group-hover:scale-110" />
-                    <span className="mt-3 block font-semibold">Watch {athlete.name} on YouTube</span>
-                    <span className="mt-1 block text-xs text-muted-foreground">Opens a YouTube search for match and medal highlights</span>
+                <a href={youtubeSearch} target="_blank" rel="noopener noreferrer" className="group relative mt-5 flex aspect-video items-end overflow-hidden rounded-xl bg-slate-900" style={{ background: `linear-gradient(135deg, ${meta?.accent ?? "#13234A"}, #0B1120)` }}>
+                  {profile?.image && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={profile.image.src} alt="" className="absolute inset-0 size-full object-cover object-top opacity-40 blur-[2px] transition duration-500 group-hover:scale-105 group-hover:opacity-55" />
+                  )}
+                  <span className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <span className="absolute left-1/2 top-1/2 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-600 text-white shadow-xl transition group-hover:scale-110">
+                    <PlayCircle className="size-8" />
+                  </span>
+                  <span className="relative p-5 text-white">
+                    <span className="block font-display text-lg font-bold">{athlete.name}: highlights</span>
+                    <span className="mt-0.5 block text-xs text-white/75">No verified video added yet. Tap to search match and medal highlights on YouTube.</span>
                   </span>
                 </a>
               )}
