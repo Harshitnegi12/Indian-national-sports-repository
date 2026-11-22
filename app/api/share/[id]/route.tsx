@@ -3,6 +3,21 @@ import { TIER_LABEL, getAthleteById, getSportCategory } from "@/lib/athlete-data
 import { getAthleteProfile } from "@/lib/athlete-profiles"
 import { getRegion, getRegionMeta } from "@/lib/region-meta"
 
+// Wikimedia rejects image requests without a User-Agent, so the photo is fetched here and inlined.
+// If it can't be fetched (or is an unsupported format), the card falls back to the athlete's initials.
+async function loadPhoto(src?: string) {
+  if (!src) return undefined
+  try {
+    const res = await fetch(src, { headers: { "User-Agent": "IndianSportsRepository/1.0 (share cards)" }, signal: AbortSignal.timeout(6000) })
+    const type = res.headers.get("content-type") ?? ""
+    if (!res.ok || !/image\/(jpeg|png)/.test(type)) return undefined
+    const buf = Buffer.from(await res.arrayBuffer())
+    return `data:${type.split(";")[0]};base64,${buf.toString("base64")}`
+  } catch {
+    return undefined
+  }
+}
+
 // Share card for an athlete. Default 1200x630 (link previews, WhatsApp); ?format=story gives 1080x1920 (Instagram stories).
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -12,7 +27,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const profile = getAthleteProfile(id)
   const region = getRegion(athlete.regionId)
   const accent = region ? getRegionMeta(region).accent : "#E8731A"
-  const photo = profile?.image?.src
+  const photo = await loadPhoto(profile?.image?.src)
   const width = story ? 1080 : 1200
   const height = story ? 1920 : 630
   const highlight = athlete.highlights[0] ?? athlete.summary
