@@ -5,7 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-hindi: var(--font-mukta), var(--font-inter), sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
   --color-saffron: var(--saffron);
   --color-saffron-foreground: var(--saffron-foreground);
@@ -13,19 +15,10 @@
   --color-india-green-foreground: var(--india-green-foreground);
   --color-ashoka-navy: var(--ashoka-navy);
   --color-ashoka-navy-foreground: var(--ashoka-navy-foreground);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
+  --color-hero: var(--hero);
+  --color-hero-foreground: var(--hero-foreground);
+  --color-hero-muted: var(--hero-muted);
+  --color-gold: var(--gold);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -44,6 +37,9 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+  --color-chart-1: var(--saffron);
+  --color-chart-2: var(--ashoka-navy);
+  --color-chart-3: var(--india-green);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -55,81 +51,64 @@
 
 :root {
   color-scheme: light;
-  --background: oklch(0.985 0.004 250);
-  --foreground: oklch(0.19 0.04 258);
+  --background: oklch(0.975 0.004 85);
+  --foreground: oklch(0.2 0.03 262);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.19 0.04 258);
+  --card-foreground: oklch(0.2 0.03 262);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.19 0.04 258);
-  --primary: oklch(0.24 0.075 258);
+  --popover-foreground: oklch(0.2 0.03 262);
+  --primary: oklch(0.27 0.08 262);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.955 0.01 250);
-  --secondary-foreground: oklch(0.24 0.075 258);
-  --muted: oklch(0.96 0.008 250);
-  --muted-foreground: oklch(0.46 0.03 256);
-  --accent: oklch(0.95 0.018 55);
-  --accent-foreground: oklch(0.24 0.075 258);
+  --secondary: oklch(0.95 0.006 85);
+  --secondary-foreground: oklch(0.27 0.08 262);
+  --muted: oklch(0.955 0.005 85);
+  --muted-foreground: oklch(0.47 0.02 262);
+  --accent: oklch(0.955 0.02 60);
+  --accent-foreground: oklch(0.27 0.08 262);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.905 0.012 252);
-  --input: oklch(0.905 0.012 252);
-  --ring: oklch(0.24 0.075 258);
-  --saffron: oklch(0.64 0.185 44);
+  --border: oklch(0.9 0.008 85);
+  --input: oklch(0.88 0.01 85);
+  --ring: oklch(0.62 0.17 50);
+  --saffron: oklch(0.62 0.18 47);
   --saffron-foreground: oklch(0.99 0 0);
-  --india-green: oklch(0.51 0.135 156);
+  --india-green: oklch(0.5 0.13 155);
   --india-green-foreground: oklch(0.99 0 0);
-  --ashoka-navy: oklch(0.24 0.075 258);
+  --ashoka-navy: oklch(0.27 0.08 262);
   --ashoka-navy-foreground: oklch(0.99 0 0);
-  --chart-1: oklch(0.64 0.185 44);
-  --chart-2: oklch(0.24 0.075 258);
-  --chart-3: oklch(0.51 0.135 156);
-  --chart-4: oklch(0.55 0.14 240);
-  --chart-5: oklch(0.74 0.15 70);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.19 0.04 258);
-  --sidebar-primary: oklch(0.24 0.075 258);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.96 0.008 250);
-  --sidebar-accent-foreground: oklch(0.24 0.075 258);
-  --sidebar-border: oklch(0.905 0.012 252);
-  --sidebar-ring: oklch(0.24 0.075 258);
+  --gold: oklch(0.72 0.14 80);
+  /* Dark "stadium" bands used by heroes in both themes */
+  --hero: oklch(0.19 0.045 262);
+  --hero-foreground: oklch(0.97 0.006 85);
+  --hero-muted: oklch(0.76 0.02 262);
+  --radius: 0.75rem;
 }
 
 .dark {
   color-scheme: dark;
-  --background: oklch(0.17 0.025 258);
-  --foreground: oklch(0.94 0.012 250);
-  --card: oklch(0.21 0.03 258);
-  --card-foreground: oklch(0.94 0.012 250);
-  --popover: oklch(0.21 0.03 258);
-  --popover-foreground: oklch(0.94 0.012 250);
-  --primary: oklch(0.83 0.12 75);
-  --primary-foreground: oklch(0.19 0.04 258);
-  --secondary: oklch(0.26 0.03 258);
-  --secondary-foreground: oklch(0.92 0.015 250);
-  --muted: oklch(0.25 0.025 258);
-  --muted-foreground: oklch(0.72 0.025 250);
-  --accent: oklch(0.29 0.04 258);
-  --accent-foreground: oklch(0.94 0.012 250);
-  --border: oklch(0.34 0.025 258);
-  --input: oklch(0.34 0.025 258);
-  --ring: oklch(0.78 0.12 75);
-  --saffron: oklch(0.76 0.16 54);
-  --india-green: oklch(0.68 0.13 156);
-  --ashoka-navy: oklch(0.83 0.08 230);
-  --chart-1: oklch(0.76 0.16 54);
-  --chart-2: oklch(0.72 0.1 230);
-  --chart-3: oklch(0.68 0.13 156);
-  --chart-4: oklch(0.72 0.1 280);
-  --chart-5: oklch(0.8 0.14 80);
-  --sidebar: oklch(0.19 0.028 258);
-  --sidebar-foreground: oklch(0.94 0.012 250);
-  --sidebar-primary: oklch(0.83 0.12 75);
-  --sidebar-primary-foreground: oklch(0.19 0.04 258);
-  --sidebar-accent: oklch(0.25 0.025 258);
-  --sidebar-accent-foreground: oklch(0.94 0.012 250);
-  --sidebar-border: oklch(0.34 0.025 258);
-  --sidebar-ring: oklch(0.78 0.12 75);
+  --background: oklch(0.155 0.02 262);
+  --foreground: oklch(0.94 0.008 260);
+  --card: oklch(0.2 0.024 262);
+  --card-foreground: oklch(0.94 0.008 260);
+  --popover: oklch(0.21 0.026 262);
+  --popover-foreground: oklch(0.94 0.008 260);
+  --primary: oklch(0.78 0.14 60);
+  --primary-foreground: oklch(0.18 0.03 262);
+  --secondary: oklch(0.25 0.025 262);
+  --secondary-foreground: oklch(0.92 0.01 260);
+  --muted: oklch(0.235 0.022 262);
+  --muted-foreground: oklch(0.72 0.02 260);
+  --accent: oklch(0.27 0.03 262);
+  --accent-foreground: oklch(0.94 0.008 260);
+  --border: oklch(0.3 0.022 262);
+  --input: oklch(0.34 0.024 262);
+  --ring: oklch(0.75 0.15 55);
+  --saffron: oklch(0.75 0.16 55);
+  --india-green: oklch(0.7 0.14 155);
+  --ashoka-navy: oklch(0.9 0.035 255);
+  --gold: oklch(0.8 0.13 85);
+  --hero: oklch(0.13 0.025 262);
+  --hero-foreground: oklch(0.97 0.006 85);
+  --hero-muted: oklch(0.74 0.02 262);
 }
 
 @layer base {
@@ -138,71 +117,207 @@
   }
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
   }
   body {
     @apply bg-background text-foreground font-sans;
+    font-feature-settings: "cv11", "ss01";
+  }
+  h1, h2, h3 {
+    @apply font-display;
+    letter-spacing: -0.02em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 }
 
-.dark .text-ashoka-navy {
-  color: oklch(0.83 0.08 230);
-}
-
-.dark .bg-white:not([class*="/"], [class*="opacity-"]) {
-  background-color: oklch(0.23 0.03 258);
-}
-
-.dark .bg-white\/45 { background-color: oklch(0.22 0.03 258 / 0.78); }
-.dark .bg-white\/50 { background-color: oklch(0.22 0.03 258 / 0.82); }
-.dark .bg-white\/70 { background-color: oklch(0.22 0.03 258 / 0.9); }
-.dark .from-white\/50 { --tw-gradient-from: oklch(0.23 0.03 258 / 0.7) var(--tw-gradient-from-position); }
-.dark .from-white\/70 { --tw-gradient-from: oklch(0.23 0.03 258 / 0.9) var(--tw-gradient-from-position); }
-.dark .to-emerald-50\/40 { --tw-gradient-to: oklch(0.25 0.05 160 / 0.22) var(--tw-gradient-to-position); }
-
-
-/* Fixed 3D India map watermark */
-.india-map-watermark {
-  transform: perspective(1000px) rotateX(12deg) rotateY(-10deg) rotateZ(-2deg);
-  filter:
-    drop-shadow(2px 3px 0 rgba(10, 30, 65, .95))
-    drop-shadow(4px 6px 0 rgba(10, 30, 65, .9))
-    drop-shadow(7px 10px 0 rgba(10, 30, 65, .82))
-    drop-shadow(11px 16px 0 rgba(10, 30, 65, .72))
-    drop-shadow(0 26px 30px rgba(10, 30, 65, .3));
-}
-
-@media (max-width: 640px) {
-  .india-map-watermark {
-    transform: perspective(900px) rotateX(9deg) rotateY(-7deg) rotateZ(-1deg);
-    filter:
-      drop-shadow(1px 2px 0 rgba(10, 30, 65, .9))
-      drop-shadow(3px 5px 0 rgba(10, 30, 65, .82))
-      drop-shadow(5px 8px 0 rgba(10, 30, 65, .72))
-      drop-shadow(0 18px 22px rgba(10, 30, 65, .26));
+@layer components {
+  .site-container {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.16em];
+  }
+  .tricolor-rule {
+    height: 3px;
+    background: linear-gradient(90deg, #ff9933 0 33.33%, #ffffff 33.33% 66.66%, #138808 66.66% 100%);
+  }
+  .hero-surface {
+    background-color: var(--hero);
+    color: var(--hero-foreground);
+    background-image:
+      radial-gradient(60rem 30rem at 85% -10%, color-mix(in oklch, var(--accent-region, #ff9933) 32%, transparent), transparent 60%),
+      radial-gradient(40rem 24rem at -10% 110%, color-mix(in oklch, #138808 22%, transparent), transparent 60%);
+  }
+  .hero-grid {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at 70% 30%, black 20%, transparent 75%);
+  }
+  .card-lift {
+    @apply transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-12px_rgb(15_23_42/0.25)];
+  }
+  .chip {
+    @apply inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-foreground/80 transition hover:border-foreground/25 hover:text-foreground;
+  }
+  .chip[aria-pressed="true"] {
+    @apply border-transparent bg-foreground text-background;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 
-/* Raised tricolour map watermark, fixed behind the page while content scrolls. */
-.india-map-extrusion {
-  opacity: 0.72;
-  transform: perspective(1200px) translate3d(18px, 22px, -24px) rotateX(6deg) rotateY(-5deg);
-  filter: brightness(0) saturate(100%) invert(11%) sepia(25%) saturate(2014%) hue-rotate(187deg) brightness(88%) contrast(96%);
+/* ---------- Interaction & motion ---------- */
+
+:root {
+  --map-low: #1F6F78;
+  --map-high: #F2861E;
+  --map-empty: rgb(255 255 255 / 0.08);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.india-map-face {
-  opacity: 0.76;
-  transform: perspective(1200px) rotateX(6deg) rotateY(-5deg);
-  filter: drop-shadow(0 24px 34px rgba(10, 30, 65, 0.22));
+/* India map */
+.india-map path,
+.india-map .map-marker {
+  stroke: rgb(255 255 255 / 0.28);
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.25s var(--ease-out), filter 0.25s var(--ease-out), stroke 0.2s, stroke-width 0.2s;
+  animation: map-in 0.7s var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 18ms + 150ms);
+}
+.india-map .map-marker {
+  stroke: #fff;
+  stroke-width: 1.2;
+  animation-delay: 900ms;
+}
+.india-map:has([data-active]) path:not([data-active]),
+.india-map:has([data-active]) .map-marker:not([data-active]) {
+  opacity: 0.45;
+}
+.india-map [data-active],
+.india-map path:focus-visible {
+  fill: #FFB15C !important;
+  stroke: #fff;
+  stroke-width: 1.4;
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.45)) drop-shadow(0 0 14px rgb(255 153 51 / 0.45));
+}
+.india-map [data-selected]:not([data-active]) {
+  stroke: #fff;
+  stroke-width: 1.1;
+}
+@keyframes map-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
 }
 
-@media (max-width: 640px) {
-  .india-map-extrusion {
-    opacity: 0.56;
-    transform: perspective(900px) translate3d(10px, 14px, -18px) rotateX(4deg) rotateY(-3deg);
-  }
+/* State district map */
+:root { --state-map-empty: oklch(0.93 0.01 85); }
+.dark { --state-map-empty: oklch(0.28 0.02 262); }
+.state-map path {
+  stroke: var(--card);
+  stroke-width: 0.8;
+  stroke-linejoin: round;
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.25s var(--ease-out), filter 0.25s var(--ease-out), stroke-width 0.2s;
+  animation: map-in 0.6s var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 12ms);
+}
+.state-map:has([data-active]) path:not([data-active]) { opacity: 0.5; }
+.state-map [data-active], .state-map path:focus-visible {
+  stroke: var(--foreground);
+  stroke-width: 1.6;
+  filter: drop-shadow(0 4px 8px rgb(0 0 0 / 0.25));
+}
 
-  .india-map-face {
-    opacity: 0.64;
-    transform: perspective(900px) rotateX(4deg) rotateY(-3deg);
+/* Bilingual text (see components/site/lang.tsx) */
+.t-hi { display: none; }
+html.lang-hi .t-en { display: none; }
+html.lang-hi .t-hi { display: inline; }
+
+/* Press feedback for buttons and links */
+.pressable {
+  transition: transform 0.15s var(--ease-out), background-color 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.pressable:active {
+  transform: scale(0.97);
+}
+
+/* Cursor-following spotlight on cards (position set by SpotlightTracker) */
+.spotlight {
+  position: relative;
+  isolation: isolate;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), color-mix(in oklch, var(--accent-card, var(--saffron)) 12%, transparent), transparent 65%);
+}
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  padding: 1px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), color-mix(in oklch, var(--accent-card, var(--saffron)) 70%, transparent), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+@media (hover: hover) {
+  .spotlight:hover::before,
+  .spotlight:hover::after {
+    opacity: 1;
   }
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  border-radius: 0.75rem;
+  background: linear-gradient(100deg, var(--muted) 30%, color-mix(in oklch, var(--muted) 60%, var(--card)) 50%, var(--muted) 70%);
+  background-size: 300% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+@keyframes shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+/* Horizontal swipe rails on mobile */
+.snap-rail {
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.snap-rail > * {
+  scroll-snap-align: start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .india-map path, .india-map .map-marker { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

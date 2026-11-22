@@ -1,10 +1,23 @@
 import { INDIA_REGIONS } from "@/lib/india-sports-data"
+import { HARYANA_ATHLETES, HARYANA_ENRICHMENT } from "@/lib/data/haryana"
+import { BATCH_1_ATHLETES } from "@/lib/data/athletes-batch-1"
+import { BATCH_2_ATHLETES } from "@/lib/data/athletes-batch-2"
+import { BATCH_3_ATHLETES } from "@/lib/data/athletes-batch-3"
+import { WIKI_ATHLETES } from "@/lib/data/athletes-wiki"
+import { getAthleteProfile } from "@/lib/athlete-profiles"
 
 export interface AthleteSource {
   label: string
   url: string
 }
 
+/** Highest level of achievement, used for badges and for sorting champions first. */
+export type AthleteTier = "olympic-medal" | "paralympic-medal" | "world-champion" | "international" | "national"
+
+/**
+ * One athlete. Any number of athletes can share a region and sport.
+ * `sport` is "Category · Event", e.g. "Athletics · Javelin throw"; the category must be in SPORT_CATEGORIES.
+ */
 export interface AthleteRecord {
   id: string
   name: string
@@ -13,9 +26,21 @@ export interface AthleteRecord {
   summary: string
   highlights: string[]
   sources: AthleteSource[]
+  /** Village, town or district, e.g. "Khandra, Panipat". */
+  hometown?: string
+  tier?: AthleteTier
+  /** Shown in the "Champions" strip of the region page and on the home page. */
+  featured?: boolean
+  /** Small photo from Wikimedia Commons (free licence), filled from lib/data/athlete-profiles.json. */
+  photo?: string
+  /** From Wikidata (P21), used by the Women in Sports section. */
+  gender?: "female" | "male"
+  /** Only used by enrichment maps: appended to highlights / sources. */
+  extraHighlights?: string[]
+  extraSources?: AthleteSource[]
 }
 
-export const ATHLETES: AthleteRecord[] = [
+const BASE_ATHLETES: AthleteRecord[] = [
   {
     id: "neeraj-chopra", name: "Neeraj Chopra", regionId: "haryana",
     sport: "Athletics · Javelin throw",
@@ -227,7 +252,7 @@ export const ATHLETES: AthleteRecord[] = [
     ],
   },
   {
-    id: "manika-batra", name: "Manika Batra", regionId: "delhi",
+    id: "manika-batra", name: "Manika Batra", regionId: "delhi-nct",
     sport: "Table tennis · Singles",
     summary: "Indian table tennis player listed for Delhi by the Ministry of Youth Affairs and Sports.",
     highlights: ["Won two gold medals at the 2018 Commonwealth Games.", "Represented India at the Tokyo 2020 and Paris 2024 Olympic Games."],
@@ -459,6 +484,62 @@ export const ATHLETES: AthleteRecord[] = [
     ],
   },
 ]
+
+const ENRICHMENT: Record<string, Partial<AthleteRecord>> = {
+  ...HARYANA_ENRICHMENT,
+}
+
+function enrich(athlete: AthleteRecord): AthleteRecord {
+  const extra = ENRICHMENT[athlete.id]
+  if (!extra) return athlete
+  const { extraHighlights, extraSources, ...rest } = extra
+  return {
+    ...athlete,
+    ...rest,
+    highlights: [...athlete.highlights, ...(extraHighlights ?? [])],
+    sources: [...athlete.sources, ...(extraSources ?? [])],
+  }
+}
+
+const MEDAL = /\b(gold|silver|bronze|medal|champion)\b/i
+const OLYMPIC = /\bOlympic|Olympics\b/i
+
+/** Uses the explicit tier, otherwise reads it from a single highlight that names both a medal and the Games. */
+export function getAthleteTier(athlete: AthleteRecord): AthleteTier | undefined {
+  if (athlete.tier) return athlete.tier
+  for (const line of athlete.highlights) {
+    if (/Paralympic/i.test(line) && MEDAL.test(line)) return "paralympic-medal"
+  }
+  for (const line of athlete.highlights) {
+    if (OLYMPIC.test(line) && !/Youth|Winter/i.test(line) && MEDAL.test(line)) return "olympic-medal"
+  }
+  return undefined
+}
+
+// The same person can appear in hand-written data and in the Wikipedia import; the first one wins.
+// Duplicates are matched by id, by name without punctuation, and by Wikipedia article.
+function identityKeys(athlete: AthleteRecord) {
+  const keys = ["id:" + athlete.id, "name:" + athlete.name.toLowerCase().replace(/[^a-z]/g, "")]
+  for (const source of athlete.sources) {
+    const match = source.url.match(/wikipedia\.org\/wiki\/(.+)$/)
+    if (match) keys.push("wiki:" + decodeURIComponent(match[1]).toLowerCase())
+  }
+  return keys
+}
+const seen = new Set<string>()
+export const ATHLETES: AthleteRecord[] = [...BASE_ATHLETES, ...HARYANA_ATHLETES, ...BATCH_1_ATHLETES, ...BATCH_2_ATHLETES, ...BATCH_3_ATHLETES, ...WIKI_ATHLETES]
+  .filter((athlete) => {
+    const keys = identityKeys(athlete)
+    if (keys.some((key) => seen.has(key))) return false
+    keys.forEach((key) => seen.add(key))
+    return true
+  })
+  .map(enrich)
+  .map((athlete) => ({ ...athlete, tier: getAthleteTier(athlete), photo: getAthleteProfile(athlete.id)?.image?.src, gender: getAthleteProfile(athlete.id)?.gender }))
+
+export * from "@/lib/athlete-utils"
+import { getSportSlug } from "@/lib/athlete-utils"
+
 export function getAthleteById(id: string) {
   return ATHLETES.find((athlete) => athlete.id === id)
 }
@@ -471,28 +552,6 @@ export function getAthleteStaticParams() {
   return ATHLETES.map((athlete) => ({ slug: athlete.id }))
 }
 
-export function getRegionName(regionId: string) {
-  return INDIA_REGIONS.find((region) => region.id === regionId)?.name ?? regionId
-}
-
-
-
-export function getSportCategory(athlete: AthleteRecord | string) {
-  const label = typeof athlete === "string" ? athlete : athlete.sport
-  return label.split("·")[0].trim()
-}
-
-export function getSportSlug(sport: string) {
-  return getSportCategory(sport).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
-}
-
 export function getAthletesForRegionSport(regionId: string, sportSlug: string) {
   return getAthletesForRegion(regionId).filter((athlete) => getSportSlug(athlete.sport) === sportSlug)
 }
-
-export const SPORT_CATEGORIES = [
-  "Alpine skiing", "Archery", "Athletics", "Badminton", "Basketball", "Boxing", "Cricket",
-  "Football", "Hockey", "Ice hockey", "Kabaddi", "Shooting", "Sepaktakraw", "Squash", "Swimming", "Table tennis",
-  "Tennis", "Volleyball", "Weightlifting", "Wrestling", "Gymnastics", "Para athletics",
-  "Para badminton", "Para shooting", "Para table tennis",
-]

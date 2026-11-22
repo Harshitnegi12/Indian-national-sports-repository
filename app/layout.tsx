@@ -1,77 +1,69 @@
-import type { Metadata, Viewport } from 'next'
-import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google'
-import './globals.css'
-import { IndiaMapBackground } from '@/components/india-map-background'
+import type { Metadata, Viewport } from "next"
+import { Bricolage_Grotesque, Inter, JetBrains_Mono, Mukta } from "next/font/google"
+import Script from "next/script"
+import "./globals.css"
+import { SiteHeader } from "@/components/site/site-header"
+import { SiteFooter } from "@/components/site/site-footer"
+import { MotionProvider, SpotlightTracker } from "@/components/motion/motion-primitives"
+import { SITE_URL } from "@/lib/site-config"
 
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  variable: '--font-jakarta',
-  display: 'swap',
-})
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-jetbrains',
-  display: 'swap',
-})
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
+const bricolage = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage", display: "swap" })
+const mukta = Mukta({ subsets: ["devanagari", "latin"], weight: ["400", "600", "700"], variable: "--font-mukta", display: "swap" })
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" })
 
 export const metadata: Metadata = {
-  title: 'INSR | Indian National Sports Repository — Directory Prototype',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Indian Sports Repository | Athletes from every state and union territory",
+    template: "%s | Indian Sports Repository",
+  },
   description:
-    'A responsive prototype with sample state and territory profiles, academy listings, and sports programme cards. Figures and entries are illustrative and not independently verified.',
+    "Explore Indian athletes state by state: Olympic and Paralympic medallists, world champions and rising talent from all 28 states and 8 union territories, each linked to a public source.",
   icons: {
     icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
+      { url: "/icon-light-32x32.png", media: "(prefers-color-scheme: light)" },
+      { url: "/icon-dark-32x32.png", media: "(prefers-color-scheme: dark)" },
+      { url: "/icon.svg", type: "image/svg+xml" },
     ],
-    apple: '/apple-icon.png',
+    apple: "/apple-icon.png",
   },
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light',
-  themeColor: '#0F2042',
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F7F6F2" },
+    { media: "(prefers-color-scheme: dark)", color: "#0B1120" },
+  ],
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${plusJakarta.variable} ${jetbrainsMono.variable}`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${bricolage.variable} ${mukta.variable} ${jetbrainsMono.variable}`}
+    >
       <head>
-        <script
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: `try { const saved = localStorage.getItem('insr-theme'); const theme = saved === 'dark' || saved === 'light' ? saved : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.classList.add(theme); } catch { document.documentElement.classList.add('light'); }`,
+            __html: `try { const saved = localStorage.getItem('insr-theme'); const theme = saved === 'dark' || saved === 'light' ? saved : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.classList.add(theme); if (localStorage.getItem('insr-lang') === 'hi') { document.documentElement.classList.add('lang-hi'); document.documentElement.lang = 'hi' } } catch { document.documentElement.classList.add('light'); }`,
           }}
         />
       </head>
-      <body className="min-h-screen bg-background text-foreground antialiased selection:bg-saffron/15 selection:text-ashoka-navy">
-        <IndiaMapBackground />
-        <div className="relative z-10">
-          <aside role="status" className="border-b border-saffron/30 bg-amber-50/95 px-4 py-2.5 text-center text-xs leading-relaxed text-foreground sm:text-sm">
-            <strong>Prototype preview:</strong> figures, academy listings, and programme details are sample content and are not independently verified. Portal sign-in is demonstration only.
-          </aside>
-          {children}
-        </div>
+      <body className="min-h-screen bg-background text-foreground antialiased selection:bg-saffron/20">
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-card focus:px-4 focus:py-2 focus:shadow-lg">
+          Skip to content
+        </a>
+        <MotionProvider>
+          <SiteHeader />
+          <main id="main">{children}</main>
+          <SiteFooter />
+        </MotionProvider>
+        <SpotlightTracker />
       </body>
     </html>
   )
 }
-
-
-
-
-
-

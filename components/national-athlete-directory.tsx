@@ -1,40 +1,103 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
-import { ArrowUpRight, Search, SlidersHorizontal } from "lucide-react"
-import { ATHLETES, getRegionName, getSportCategory } from "@/lib/athlete-data"
-import { INDIA_REGIONS } from "@/lib/india-sports-data"
+import { useSearchParams } from "next/navigation"
+import { AnimatePresence, motion } from "motion/react"
+import { Search, X } from "lucide-react"
+import { AthleteCard } from "@/components/site/athlete-card"
+import type { AthleteRecord } from "@/lib/athlete-data"
+import { compareAthletes, getRegionName, getSportCategory, isMedallist } from "@/lib/athlete-utils"
+import { REGIONS_SORTED } from "@/lib/region-meta"
 
-export function NationalAthleteDirectory() {
-  const [query, setQuery] = React.useState("")
-  const [sport, setSport] = React.useState("all")
-  const [region, setRegion] = React.useState("all")
-  const sports = Array.from(new Set(ATHLETES.map((athlete) => getSportCategory(athlete)))).sort()
-  const filtered = ATHLETES.filter((athlete) => {
-    const matchesSport = sport === "all" || getSportCategory(athlete) === sport
-    const matchesRegion = region === "all" || athlete.regionId === region
-    const matchesQuery = !query.trim() || [athlete.name, athlete.sport, getRegionName(athlete.regionId)].join(" ").toLowerCase().includes(query.trim().toLowerCase())
-    return matchesSport && matchesRegion && matchesQuery
-  }).sort((a, b) => a.name.localeCompare(b.name))
+export function NationalAthleteDirectory({ athletes: ATHLETES, accents }: { athletes: AthleteRecord[]; accents: Record<string, string> }) {
+  const params = useSearchParams()
+  const [query, setQuery] = React.useState(params.get("q") ?? "")
+  const [sport, setSport] = React.useState(params.get("sport") ?? "all")
+  const [region, setRegion] = React.useState(params.get("region") ?? "all")
+  const [medalOnly, setMedalOnly] = React.useState(false)
+  const [sort, setSort] = React.useState<"achievement" | "name">("achievement")
+  const [limit, setLimit] = React.useState(48)
+  React.useEffect(() => setLimit(48), [query, sport, region, medalOnly, sort])
 
-  return <section id="athlete-profiles" className="scroll-mt-20 border-y border-border bg-card/60 py-12 sm:py-16">
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-india-green">National directory</p><h2 className="mt-2 text-2xl font-extrabold text-ashoka-navy sm:text-3xl">Athletes across India</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Search the profiles currently listed, or narrow by sport and region. Select a player to open their own page and check sources.</p></div>
-        <span className="text-xs text-muted-foreground">{ATHLETES.length} source-linked profiles · selective coverage</span>
+  const sports = React.useMemo(() => Array.from(new Set(ATHLETES.map((athlete) => getSportCategory(athlete)))).sort(), [ATHLETES])
+
+  const filtered = React.useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return ATHLETES.filter((athlete) => sport === "all" || getSportCategory(athlete) === sport)
+      .filter((athlete) => region === "all" || athlete.regionId === region)
+      .filter((athlete) => !medalOnly || isMedallist(athlete))
+      .filter((athlete) => !q || [athlete.name, athlete.sport, athlete.hometown ?? "", getRegionName(athlete.regionId)].join(" ").toLowerCase().includes(q))
+      .sort(sort === "name" ? (a, b) => a.name.localeCompare(b.name) : compareAthletes)
+  }, [ATHLETES, query, sport, region, medalOnly, sort])
+
+  const select = "h-11 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-ring"
+
+  return (
+    <div>
+      <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 sm:p-5 md:grid-cols-[1.5fr_1fr_1fr_auto]">
+        <label className="relative">
+          <span className="sr-only">Search athletes</span>
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, event, hometown or state" className="h-11 w-full rounded-lg border border-input bg-background pl-9 pr-9 text-sm outline-none focus:border-ring" />
+          {query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"><X className="size-4" /></button>}
+        </label>
+        <select aria-label="Sport" value={sport} onChange={(event) => setSport(event.target.value)} className={select}>
+          <option value="all">All sports</option>
+          {sports.map((value) => <option key={value} value={value}>{value}</option>)}
+        </select>
+        <select aria-label="State or UT" value={region} onChange={(event) => setRegion(event.target.value)} className={select}>
+          <option value="all">All states &amp; UTs</option>
+          {REGIONS_SORTED.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+        </select>
+        <label className="flex h-11 items-center gap-2 rounded-lg border border-input bg-background px-3 text-sm">
+          <input type="checkbox" checked={medalOnly} onChange={(event) => setMedalOnly(event.target.checked)} className="size-4 accent-[var(--saffron)]" />
+          Medallists only
+        </label>
       </div>
-      <div className="mt-6 grid gap-3 md:grid-cols-[1.4fr_1fr_1fr]">
-        <label className="relative"><span className="sr-only">Search athletes</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search athlete or region" className="h-11 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ashoka-navy/20"/></label>
-        <label className="flex h-11 items-center gap-2 rounded-xl border border-border bg-background px-3 text-xs text-muted-foreground"><SlidersHorizontal size={15}/><span>Sport</span><select value={sport} onChange={(event) => setSport(event.target.value)} className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none"><option value="all">All sports</option>{sports.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
-        <label className="flex h-11 items-center gap-2 rounded-xl border border-border bg-background px-3 text-xs text-muted-foreground"><span>Region</span><select value={region} onChange={(event) => setRegion(event.target.value)} className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none"><option value="all">All regions</option>{INDIA_REGIONS.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+
+      <div className="mt-6 flex items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground" aria-live="polite">Showing {filtered.length} of {ATHLETES.length} athletes</p>
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          Sort
+          <select value={sort} onChange={(event) => setSort(event.target.value as "achievement" | "name")} className="h-10 rounded-lg border border-input bg-card px-2 text-foreground">
+            <option value="achievement">Top achievements</option>
+            <option value="name">Name A–Z</option>
+          </select>
+        </label>
       </div>
-      <p className="mt-4 text-xs text-muted-foreground">Showing {filtered.length} of {ATHLETES.length} currently listed profiles</p>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((athlete) => <Link key={athlete.id} href={"/athletes/" + athlete.id} className="group rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-india-green/40 hover:shadow-md"><p className="text-xs font-semibold uppercase tracking-wider text-saffron">{athlete.sport}</p><h3 className="mt-2 text-lg font-bold text-ashoka-navy">{athlete.name}</h3><p className="mt-1 text-xs text-muted-foreground">{getRegionName(athlete.regionId)}</p><p className="mt-3 text-sm leading-6 text-foreground/80">{athlete.highlights[0]}</p><span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-india-green">View athlete page <ArrowUpRight className="size-3.5"/></span></Link>)}
-        {!filtered.length && <p className="rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">No profiles match these filters. Try a different sport or region.</p>}
-      </div>
-      <p className="mt-6 text-xs leading-5 text-muted-foreground">This is a growing source-checked selection, not a complete national roster of every athlete since 1947.</p>
+
+      {filtered.length ? (
+        <>
+        <motion.div layout className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <AnimatePresence mode="popLayout" initial={false}>
+            {filtered.slice(0, limit).map((athlete) => (
+              <motion.div
+                key={athlete.id}
+                layout
+                initial={{ opacity: 0, scale: 0.94, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.15 } }}
+                transition={{ type: "spring", stiffness: 380, damping: 34, mass: 0.7 }}
+              >
+                <AthleteCard athlete={athlete} showRegion accent={accents[athlete.regionId]} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+      {filtered.length > limit && (
+        <div className="mt-8 flex justify-center">
+          <button type="button" onClick={() => setLimit((l) => l + 48)} className="pressable rounded-xl border border-border bg-card px-6 py-3 text-sm font-semibold hover:border-foreground/25">
+            Show more ({filtered.length - limit} more)
+          </button>
+        </div>
+      )}
+        </>
+      ) : (
+        <div className="mt-6 rounded-2xl border border-dashed border-border bg-card p-10 text-center">
+          <p className="font-semibold">No athletes match these filters.</p>
+          <button type="button" onClick={() => { setQuery(""); setSport("all"); setRegion("all"); setMedalOnly(false) }} className="mt-3 text-sm font-semibold text-saffron hover:underline">Clear filters</button>
+        </div>
+      )}
     </div>
-  </section>
+  )
 }

@@ -1,10 +1,45 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
-import { InsrHeader } from "@/components/insr-header"
-import { StatesDirectoryRoute } from "@/components/states-directory-route"
+import { INDIA_REGIONS } from "@/lib/india-sports-data"
+import { getAthletesForRegion, isMedallist } from "@/lib/athlete-data"
+import { getRegionMeta } from "@/lib/region-meta"
+import { StatesUtGrid, type RegionCardData } from "@/components/states-ut-grid"
+import { PageHero } from "@/components/site/page-hero"
+
+export const metadata: Metadata = { title: "States & Union Territories" }
 
 export default function StatesDirectoryPage() {
-  return <div className="min-h-screen bg-background/40 text-foreground">
-    <InsrHeader />
-    <main className="min-h-[75vh]"><div className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8"><p className="text-xs font-bold uppercase tracking-[0.18em] text-saffron">Choose a region</p><h1 className="mt-2 text-4xl font-extrabold tracking-tight text-ashoka-navy">States &amp; Union Territories</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">Each region opens a dedicated page with its local profile, sports directory, athletes, and official links.</p></div><Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-12 text-sm text-muted-foreground">Loading regions...</div>}><StatesDirectoryRoute /></Suspense></main>
-  </div>
+  const regions: RegionCardData[] = INDIA_REGIONS.map((region) => {
+    const meta = getRegionMeta(region)
+    const athletes = getAthletesForRegion(region.id)
+    return {
+      id: region.id,
+      name: region.name,
+      hindi: meta.hindi,
+      code: region.code,
+      type: region.type,
+      zone: region.zone,
+      capital: region.capital,
+      accent: meta.accent,
+      count: athletes.length,
+      medallists: athletes.filter(isMedallist).length,
+      athleteText: athletes.map((athlete) => athlete.name + " " + athlete.sport).join(" "),
+    }
+  })
+
+  return (
+    <>
+      <PageHero
+        eyebrow="Choose a region"
+        title="States & Union Territories"
+        hindi="राज्य और केंद्र शासित प्रदेश"
+        text="All 28 states and 8 union territories, each with its own page of athletes, sports, academies and official links."
+      />
+      <div className="site-container py-10">
+        <Suspense fallback={<p className="text-sm text-muted-foreground">Loading regions…</p>}>
+          <StatesUtGrid regions={regions} />
+        </Suspense>
+      </div>
+    </>
+  )
 }

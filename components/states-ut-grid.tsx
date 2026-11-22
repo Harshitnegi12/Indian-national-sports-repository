@@ -2,122 +2,126 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import { AnimatePresence, motion } from "motion/react"
+import { ArrowUpRight, Search, X } from "lucide-react"
 import { INDIA_REGIONS, type ZoneType } from "@/lib/india-sports-data"
-import { getAthletesForRegion } from "@/lib/athlete-data"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { ArrowUpRight, Filter, MapPin, Search, X } from "lucide-react"
 
-interface StatesUtGridProps {
-  externalSearchQuery: string
-  onExternalSearchChange: (query: string) => void
+export interface RegionCardData {
+  id: string
+  name: string
+  hindi: string
+  code: string
+  type: string
+  zone: ZoneType
+  capital: string
+  accent: string
+  count: number
+  medallists: number
+  athleteText: string
 }
 
-const ZONES: ("All zones" | ZoneType)[] = ["All zones", "North", "South", "East", "West", "Central", "North-East", "Coastal & Islands"]
+const ZONES: ("All zones" | ZoneType)[] = ["All zones", "North", "North-East", "East", "Central", "West", "South", "Coastal & Islands"]
 
-export function StatesUtGrid({ externalSearchQuery, onExternalSearchChange }: StatesUtGridProps) {
-  const [regionFilter, setRegionFilter] = React.useState<"all" | "State" | "Union Territory">("all")
-  const [selectedZone, setSelectedZone] = React.useState<"All zones" | ZoneType>("All zones")
+export function StatesUtGrid({ regions }: { regions: RegionCardData[] }) {
+  const params = useSearchParams()
+  const [query, setQuery] = React.useState(params.get("search") ?? "")
+  const [type, setType] = React.useState<"all" | "State" | "Union Territory">("all")
+  const [zone, setZone] = React.useState<"All zones" | ZoneType>("All zones")
   const [sortBy, setSortBy] = React.useState<"alphabetical" | "profiles">("alphabetical")
 
   const stateCount = INDIA_REGIONS.filter((region) => region.type === "State").length
-  const utCount = INDIA_REGIONS.filter((region) => region.type === "Union Territory").length
+  const utCount = INDIA_REGIONS.length - stateCount
 
-  const regions = React.useMemo(() => {
-    const query = externalSearchQuery.trim().toLowerCase()
-    const filtered = INDIA_REGIONS.filter((region) => {
-      if (regionFilter !== "all" && region.type !== regionFilter) return false
-      if (selectedZone !== "All zones" && region.zone !== selectedZone) return false
-      if (!query) return true
-      const athleteMatch = getAthletesForRegion(region.id).some((athlete) => (athlete.name + " " + athlete.sport).toLowerCase().includes(query))
-      return [region.name, region.code, region.capital, region.zone].some((value) => value.toLowerCase().includes(query)) || athleteMatch
-    })
-    return filtered.sort((a, b) => {
-      if (sortBy === "profiles") return getAthletesForRegion(b.id).length - getAthletesForRegion(a.id).length || a.name.localeCompare(b.name)
-      return a.name.localeCompare(b.name)
-    })
-  }, [externalSearchQuery, regionFilter, selectedZone, sortBy])
+  const visible = React.useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return regions
+      .filter((region) => type === "all" || region.type === type)
+      .filter((region) => zone === "All zones" || region.zone === zone)
+      .filter((region) => !q || [region.name, region.code, region.capital, region.zone, region.hindi, region.athleteText].join(" ").toLowerCase().includes(q))
+      .sort((a, b) => (sortBy === "profiles" ? b.count - a.count || a.name.localeCompare(b.name) : a.name.localeCompare(b.name)))
+  }, [regions, query, type, zone, sortBy])
 
   return (
-    <section id="states-ut-directory" className="scroll-mt-20 bg-background/40 py-12 sm:py-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col justify-between gap-6 border-b border-border pb-7 lg:flex-row lg:items-end">
-          <div>
-            <Badge variant="outline" className="border-ashoka-navy/25 bg-ashoka-navy/5 text-ashoka-navy"><MapPin className="mr-1.5 size-3.5 text-saffron" />India · Regional directory</Badge>
-            <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-ashoka-navy sm:text-3xl">Explore all {stateCount} states and {utCount} union territories</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Open any region page to see its listed source-linked athlete profiles. Regions without a profile are clearly marked while records are being added.</p>
-          </div>
-          <div className="inline-flex self-start rounded-xl border border-border bg-muted/70 p-1 lg:self-auto">
-            {([
-              ["all", "All regions", INDIA_REGIONS.length],
-              ["State", "States", stateCount],
-              ["Union Territory", "Union territories", utCount],
-            ] as const).map(([value, label, count]) => (
-              <button key={value} type="button" onClick={() => setRegionFilter(value)} aria-pressed={regionFilter === value} className={"rounded-lg px-3 py-2 text-xs font-semibold transition " + (regionFilter === value ? "bg-ashoka-navy text-white shadow-sm" : "text-muted-foreground hover:text-foreground")}>
-                {label}<span className={"ml-1.5 rounded px-1 py-0.5 font-mono text-[10px] " + (regionFilter === value ? "bg-white/20" : "bg-background")}>{count}</span>
+    <div>
+      <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 sm:p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
+          <label className="relative block w-full md:max-w-md">
+            <span className="sr-only">Search regions and athletes</span>
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search a state, capital or athlete"
+              className="h-11 w-full rounded-lg border border-input bg-background pl-9 pr-9 text-sm outline-none focus:border-ring"
+            />
+            {query && (
+              <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"><X className="size-4" /></button>
+            )}
+          </label>
+          <div className="inline-flex rounded-lg border border-border bg-muted p-1">
+            {([["all", "All", INDIA_REGIONS.length], ["State", "States", stateCount], ["Union Territory", "UTs", utCount]] as const).map(([value, label, count]) => (
+              <button key={value} type="button" onClick={() => setType(value)} aria-pressed={type === value} className={"rounded-md px-3 py-1.5 text-sm font-medium transition " + (type === value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+                {label} <span className="font-mono text-[11px] opacity-60">{count}</span>
               </button>
             ))}
           </div>
+          <label className="flex items-center gap-2 text-sm text-muted-foreground md:ml-auto">
+            Sort
+            <select value={sortBy} onChange={(event) => setSortBy(event.target.value as "alphabetical" | "profiles")} className="h-10 rounded-lg border border-input bg-background px-2 text-foreground">
+              <option value="alphabetical">A to Z</option>
+              <option value="profiles">Most athletes</option>
+            </select>
+          </label>
         </div>
-
-        <div className="mt-6 flex flex-col gap-4">
-          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-            <label className="relative block w-full max-w-lg">
-              <span className="sr-only">Search regions and listed athletes</span>
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={externalSearchQuery} onChange={(event) => onExternalSearchChange(event.target.value)} placeholder="Search region, capital, or listed athlete" className="h-10 bg-card pl-9 pr-9" />
-              {externalSearchQuery && <button type="button" onClick={() => onExternalSearchChange("")} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"><X className="size-4" /></button>}
-            </label>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground">Showing {regions.length} of {INDIA_REGIONS.length} regions</span>
-              <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                Sort
-                <select value={sortBy} onChange={(event) => setSortBy(event.target.value as "alphabetical" | "profiles")} className="h-9 rounded-lg border border-border bg-card px-2 text-foreground">
-                  <option value="alphabetical">A to Z</option>
-                  <option value="profiles">Most profiles</option>
-                </select>
-              </label>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground"><Filter className="size-3.5" />Zone</span>
-            {ZONES.map((zone) => <button key={zone} type="button" onClick={() => setSelectedZone(zone)} aria-pressed={selectedZone === zone} className={"shrink-0 rounded-full border px-3 py-1.5 text-xs transition " + (selectedZone === zone ? "border-ashoka-navy bg-ashoka-navy text-white" : "border-border bg-card text-foreground/80 hover:bg-muted")}>{zone}</button>)}
-          </div>
+        <div className="no-scrollbar flex gap-2 overflow-x-auto">
+          {ZONES.map((item) => (
+            <button key={item} type="button" className="chip text-[13px]" aria-pressed={zone === item} onClick={() => setZone(item)}>{item}</button>
+          ))}
         </div>
-
-        {regions.length ? (
-          <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {regions.map((region) => {
-              const profileCount = getAthletesForRegion(region.id).length
-              return (
-                <Link key={region.id} href={"/states/" + region.id} className="group relative flex min-h-48 flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-india-green/40 hover:shadow-md">
-                  <span className={"absolute inset-x-0 top-0 h-1 " + (region.accentTone === "saffron" ? "bg-saffron" : region.accentTone === "green" ? "bg-india-green" : "bg-ashoka-navy")} />
-                  <div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="rounded-md border border-border bg-muted px-2 py-1 font-mono text-[11px] font-bold text-ashoka-navy">{region.code}</span>
-                      <Badge variant="secondary" className={region.type === "State" ? "bg-saffron/10 text-saffron" : "bg-india-green/10 text-india-green"}>{region.type}</Badge>
-                    </div>
-                    <h3 className="mt-4 text-lg font-bold text-ashoka-navy">{region.name}</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">Capital: {region.capital}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{region.zone} zone</p>
-                  </div>
-                  <div className="mt-5 flex items-end justify-between border-t border-border pt-3">
-                    <div><p className="text-lg font-bold text-ashoka-navy">{profileCount}</p><p className="text-[11px] text-muted-foreground">source-linked profiles listed</p></div>
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-india-green">Open region <ArrowUpRight className="size-3.5 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></span>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="mt-8 rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-            <h3 className="font-semibold text-ashoka-navy">No matching region or listed athlete found</h3>
-            <button type="button" onClick={() => { setRegionFilter("all"); setSelectedZone("All zones"); onExternalSearchChange("") }} className="mt-3 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted">Reset filters</button>
-          </div>
-        )}
       </div>
-    </section>
+
+      <p className="mt-6 text-sm text-muted-foreground" aria-live="polite">Showing {visible.length} of {regions.length} states and union territories</p>
+
+      {visible.length ? (
+        <motion.div layout className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <AnimatePresence mode="popLayout" initial={false}>
+          {visible.map((region) => (
+            <motion.div
+              key={region.id}
+              layout
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
+              transition={{ type: "spring", stiffness: 380, damping: 34, mass: 0.7 }}
+            >
+            <Link href={"/states/" + region.id} className="group spotlight card-lift pressable relative flex h-full min-h-52 flex-col overflow-hidden rounded-2xl border border-border bg-card p-5" style={{ ["--accent-card" as string]: region.accent }}>
+              <span className="absolute inset-x-0 top-0 h-1" style={{ background: region.accent }} />
+              <div className="flex items-center justify-between">
+                <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-[11px] font-semibold text-foreground/70">{region.code}</span>
+                <span className="text-xs font-medium text-muted-foreground">{region.type === "State" ? "State" : "Union Territory"}</span>
+              </div>
+              <h2 className="mt-4 text-xl font-bold leading-tight group-hover:text-saffron">{region.name}</h2>
+              <p className="font-hindi text-sm text-muted-foreground">{region.hindi}</p>
+              <p className="mt-2 text-xs text-muted-foreground">{region.zone} · {region.capital}</p>
+              <div className="mt-auto flex items-end justify-between border-t border-border pt-4">
+                <div>
+                  <p className="font-display text-2xl font-bold">{region.count}</p>
+                  <p className="text-[11px] text-muted-foreground">{region.medallists ? `athletes · ${region.medallists} medallists` : "athletes listed"}</p>
+                </div>
+                <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground group-hover:text-foreground">Open <ArrowUpRight className="size-3.5" /></span>
+              </div>
+            </Link>
+            </motion.div>
+          ))}
+          </AnimatePresence>
+        </motion.div>
+      ) : (
+        <div className="mt-6 rounded-2xl border border-dashed border-border bg-card p-10 text-center">
+          <p className="font-semibold">No state, capital or athlete matches your search.</p>
+          <button type="button" onClick={() => { setType("all"); setZone("All zones"); setQuery("") }} className="mt-3 text-sm font-semibold text-saffron hover:underline">Reset filters</button>
+        </div>
+      )}
+    </div>
   )
 }
-
