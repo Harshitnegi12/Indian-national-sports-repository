@@ -1,4 +1,5 @@
 import profiles from "@/lib/data/athlete-profiles.json"
+import birthAreas from "@/lib/data/athlete-birth-areas.json"
 
 // Extra profile details built by scripts/enrich-athlete-profiles.js:
 // photo (free licence, Wikimedia Commons), story (Wikipedia, CC BY-SA 4.0), birth date and birthplace (Wikidata, CC0).
@@ -31,4 +32,9 @@ export function formatBorn(born?: string) {
   if (!m) return String(y)
   const date = new Date(Date.UTC(y, m - 1, d || 1))
   return date.toLocaleDateString("en-IN", { year: "numeric", month: "long", ...(d ? { day: "numeric" } : {}), timeZone: "UTC" })
+}
+
+/** Birthplace and the administrative areas above it (Wikidata P131), from scripts/resolve-birth-districts.js. */
+export function getBirthAreas(id: string): string[] {
+  return (birthAreas as Record<string, string[]>)[id] ?? []
 }

@@ -21,7 +21,7 @@ import { SectionHeading } from "@/components/site/section-heading"
 import { SectionNav } from "@/components/region/section-nav"
 import { StateMap } from "@/components/map/state-map"
 import { athletesByDistrict, getDistrictMap } from "@/lib/district-map"
-import { getAthleteProfile } from "@/lib/athlete-profiles"
+import { getAthleteProfile, getBirthAreas } from "@/lib/athlete-profiles"
 import { ReportError } from "@/components/site/report-error"
 import { DATA_UPDATED } from "@/lib/site-config"
 import { AnimatedNumber, Reveal, Stagger, StaggerItem } from "@/components/motion/motion-primitives"
@@ -50,7 +50,7 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
   const extras = getRegionExtras(id)
   const athletes = [...getAthletesForRegion(id)].sort(compareAthletes)
   const sportCounts = getSportCounts(athletes)
-  const athletesWithPlace = athletes.map((athlete) => { const profile = getAthleteProfile(athlete.id); return { ...athlete, birthplace: [profile?.birthplace, ...(profile?.birthAreas ?? [])].filter(Boolean).join(" · ") } })
+  const athletesWithPlace = athletes.map((athlete) => { const profile = getAthleteProfile(athlete.id); return { ...athlete, birthplace: [profile?.birthplace, ...getBirthAreas(athlete.id)].filter(Boolean).join(" · ") } })
   const districtOf: Record<string, string> = {}
   for (const [district, list] of athletesByDistrict(id, athletesWithPlace)) for (const athlete of list) districtOf[athlete.id] = district
   const hasMap = Boolean(getDistrictMap(id)?.districts.length)
