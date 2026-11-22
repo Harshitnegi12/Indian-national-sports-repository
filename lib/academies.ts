@@ -1,3 +1,6 @@
+import wikiAcademies from "@/lib/data/academies-wiki.json"
+import { INDIA_REGIONS } from "@/lib/india-sports-data"
+
 // Training centres and academies across India, with official or reference links.
 // Government centres link to the Sports Authority of India; others to their own site or a reference page.
 
@@ -17,7 +20,7 @@ export interface AcademyEntry {
 const SAI = "https://sportsauthorityofindia.nic.in/"
 const wiki = (t: string) => "https://en.wikipedia.org/wiki/" + t
 
-export const ACADEMIES: AcademyEntry[] = [
+const CURATED: AcademyEntry[] = [
   // National and government centres
   { name: "Netaji Subhas National Institute of Sports (SAI NCOE Patiala)", regionId: "punjab", city: "Patiala", sports: ["Athletics", "Boxing", "Weightlifting", "Wrestling", "Multi-sport"], type: "Government", description: "India's premier national sports institute and SAI centre of excellence, home to many national camps.", url: wiki("Netaji_Subhas_National_Institute_of_Sports") },
   { name: "SAI National Centre of Excellence, Bengaluru", regionId: "karnataka", city: "Bengaluru", sports: ["Hockey", "Athletics", "Swimming", "Multi-sport"], type: "Government", description: "SAI southern centre that hosts national hockey and athletics camps.", url: SAI },
@@ -32,6 +35,7 @@ export const ACADEMIES: AcademyEntry[] = [
   { name: "Krida Prabodhini", regionId: "maharashtra", city: "Pune and other districts", sports: ["Multi-sport"], type: "Government", description: "Maharashtra government's residential sports schools that select talented children through trials.", url: "https://sports.maharashtra.gov.in/" },
   { name: "Guru Gobind Singh Sports College", regionId: "uttar-pradesh", city: "Lucknow", sports: ["Multi-sport", "Hockey"], type: "Government", description: "Residential sports college run by the Uttar Pradesh government.", url: wiki("Guru_Gobind_Singh_Sports_College") },
   { name: "G. V. Raja Sports School", regionId: "kerala", city: "Thiruvananthapuram", sports: ["Athletics", "Football", "Volleyball", "Multi-sport"], type: "Government", description: "Kerala's residential sports school that has produced many national athletes.", url: wiki("G._V._Raja_Sports_School") },
+  { name: "Maharana Pratap Sports College", regionId: "uttarakhand", city: "Dehradun", sports: ["Multi-sport"], type: "Government", description: "Uttarakhand government's residential sports college for young athletes.", url: wiki("Maharana_Pratap_Sports_College") },
   { name: "Madhya Pradesh State Shooting Academy", regionId: "madhya-pradesh", city: "Bhopal", sports: ["Shooting"], type: "Government", description: "State shooting academy with residential training for young shooters.", url: "https://dsywmp.gov.in/" },
 
   // Services
@@ -57,6 +61,22 @@ export const ACADEMIES: AcademyEntry[] = [
   { name: "Reliance Foundation Young Champs", regionId: "maharashtra", city: "Navi Mumbai", sports: ["Football"], type: "Corporate", description: "Residential football academy for young players.", url: "https://www.reliancefoundation.org/" },
   { name: "Mary Kom Regional Boxing Foundation", regionId: "manipur", city: "Imphal", sports: ["Boxing"], type: "Private", description: "Boxing academy started by six-time world champion Mary Kom.", url: wiki("Mary_Kom"), alumni: ["mary-kom"] },
 ]
+
+// Academies found in Wikipedia's Indian sports academy categories (scripts/import-academies.js)
+const fromWiki = (wikiAcademies as AcademyEntry[]).filter((w) => !CURATED.some((c) => c.name.toLowerCase() === w.name.toLowerCase()))
+
+// Every state and UT has Khelo India Centres and SAI-supported training, run through the national programmes.
+const stateProgrammes: AcademyEntry[] = INDIA_REGIONS.map((r) => ({
+  name: `Khelo India Centres & SAI training in ${r.name}`,
+  regionId: r.id,
+  city: "District-level centres",
+  sports: ["Multi-sport"],
+  type: "Government" as const,
+  description: `Khelo India Centres in districts of ${r.name} train young athletes in local sports, with coaching by former champions. Find the nearest centre and SAI trials on the official portals.`,
+  url: "https://kheloindia.gov.in/",
+}))
+
+export const ACADEMIES: AcademyEntry[] = [...CURATED, ...fromWiki, ...stateProgrammes]
 
 export function getAcademiesForRegion(regionId: string) {
   return ACADEMIES.filter((a) => a.regionId === regionId)
