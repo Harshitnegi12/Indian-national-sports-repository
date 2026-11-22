@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Bricolage_Grotesque, Inter, JetBrains_Mono, Mukta } from "next/font/google"
 import Script from "next/script"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css"
 import { SiteHeader } from "@/components/site/site-header"
 import { SiteFooter } from "@/components/site/site-footer"
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <SiteFooter />
         </MotionProvider>
         <SpotlightTracker />
+        <SpeedInsights />
       </body>
     </html>
   )
