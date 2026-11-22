@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { AnimatePresence, motion } from "motion/react"
 import { ArrowUpRight, Building2, GraduationCap } from "lucide-react"
@@ -10,13 +11,29 @@ export interface AcademyView extends AcademyEntry { regionName: string; alumniNa
 
 /** Filterable list of academies by state, sport and type. */
 export function AcademyFinder({ academies, states, sports }: { academies: AcademyView[]; states: { id: string; name: string }[]; sports: string[] }) {
-  const [state, setState] = React.useState("all")
+  const params = useSearchParams()
+  const [state, setState] = React.useState(params.get("state") ?? "all")
   const [sport, setSport] = React.useState("all")
   const [type, setType] = React.useState("all")
-  const list = academies.filter((a) => (state === "all" || a.regionId === state) && (sport === "all" || a.sports.includes(sport)) && (type === "all" || a.type === type))
+  const [level, setLevel] = React.useState(params.get("level") ?? "all")
+  const [limit, setLimit] = React.useState(30)
+  React.useEffect(() => setLimit(30), [state, sport, type, level])
+  const order = { National: 0, State: 1, District: 2 } as Record<string, number>
+  const list = academies
+    .filter((a) => (state === "all" || a.regionId === state) && (sport === "all" || a.sports.includes(sport)) && (type === "all" || a.type === type) && (level === "all" || a.level === level))
+    .sort((a, b) => (order[a.level ?? "State"] - order[b.level ?? "State"]) || a.regionName.localeCompare(b.regionName))
+  const levels = ["all", "National", "State", "District"].map((l) => ({ l, n: academies.filter((a) => (l === "all" || a.level === l) && (state === "all" || a.regionId === state)).length }))
   const select = "h-11 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-ring"
   return (
     <div>
+      <div className="mb-4 inline-flex flex-wrap rounded-2xl border border-border bg-muted p-1" role="tablist" aria-label="Level">
+        {levels.map(({ l, n }) => (
+          <button key={l} role="tab" aria-selected={level === l} onClick={() => setLevel(l)} className={"relative rounded-xl px-4 py-2 text-sm font-semibold transition-colors " + (level === l ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
+            {level === l && <motion.span layoutId="level-pill" className="absolute inset-0 rounded-xl bg-card shadow-sm" />}
+            <span className="relative">{l === "all" ? "All levels" : l + " level"} <span className="font-mono text-xs opacity-60">{n}</span></span>
+          </button>
+        ))}
+      </div>
       <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 sm:grid-cols-3 sm:p-5">
         <select aria-label="State" value={state} onChange={(e) => setState(e.target.value)} className={select}>
           <option value="all">All states &amp; UTs</option>
@@ -34,7 +51,7 @@ export function AcademyFinder({ academies, states, sports }: { academies: Academ
       <p className="mt-5 text-sm text-muted-foreground" aria-live="polite">{list.length} academies</p>
       <motion.div layout className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <AnimatePresence mode="popLayout" initial={false}>
-          {list.map((a) => (
+          {list.slice(0, limit).map((a) => (
             <motion.article key={a.name} layout initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }} className="group spotlight flex flex-col rounded-2xl border border-border bg-card p-6">
               <div className="flex items-start gap-3">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted"><Building2 className="size-5 text-foreground/70" /></span>
@@ -44,6 +61,7 @@ export function AcademyFinder({ academies, states, sports }: { academies: Academ
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap gap-1.5">
+                <span className="rounded-md bg-ashoka-navy/10 px-2 py-0.5 text-xs font-semibold">{a.level}</span>
                 <span className="rounded-md bg-saffron/12 px-2 py-0.5 text-xs font-semibold text-saffron">{a.type}</span>
                 {a.sports.map((s) => <span key={s} className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-foreground/75">{s}</span>)}
               </div>
@@ -59,6 +77,7 @@ export function AcademyFinder({ academies, states, sports }: { academies: Academ
           ))}
         </AnimatePresence>
       </motion.div>
+      {list.length > limit && <div className="mt-6 flex justify-center"><button type="button" onClick={() => setLimit((l) => l + 30)} className="pressable rounded-xl border border-border bg-card px-6 py-3 text-sm font-semibold">Show more ({list.length - limit} more)</button></div>}
       {!list.length && <p className="mt-6 rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No academy listed for this combination yet. Try the SAI directory or your state sports department.</p>}
     </div>
   )

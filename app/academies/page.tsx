@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { ArrowUpRight } from "lucide-react"
 import { ACADEMIES, HOW_TO_START } from "@/lib/academies"
 import { getRegionExtras } from "@/lib/region-extras"
@@ -14,7 +15,7 @@ export const metadata: Metadata = { title: "Academies & how to start", descripti
 export default function AcademiesPage() {
   const name = (id: string) => REGIONS_SORTED.find((r) => r.id === id)?.name ?? id
   // Haryana's hand-written academy list is included too
-  const haryana = getRegionExtras("haryana").academies.map((a) => ({ name: a.name, regionId: "haryana", city: a.place, sports: a.sports, type: a.name.startsWith("SAI") || a.name.includes("Khelo India") ? "Government" : "Private", description: a.description, url: a.url ?? "https://haryanasports.gov.in/" }) as const)
+  const haryana = getRegionExtras("haryana").academies.map((a) => ({ name: a.name, regionId: "haryana", city: a.place, sports: a.sports, type: a.name.startsWith("SAI") || a.name.includes("Khelo India") ? "Government" : "Private", description: a.description, url: a.url ?? "https://haryanasports.gov.in/", level: "State" }) as const)
   const all: AcademyView[] = [...ACADEMIES, ...haryana].map((a) => ({
     ...a,
     type: a.type as AcademyView["type"],
@@ -45,7 +46,7 @@ export default function AcademiesPage() {
         </section>
         <section>
           <Reveal><SectionHeading eyebrow="Find an academy" title="Academies across India" titleHi="भारत की अकादमियां" /></Reveal>
-          <div className="mt-8"><AcademyFinder academies={all} states={states} sports={sports} /></div>
+          <div className="mt-8"><Suspense fallback={null}><AcademyFinder academies={all} states={states} sports={sports} /></Suspense></div>
         </section>
         <p className="text-xs text-muted-foreground">Contact details change often: please confirm trials and admissions on the official site before visiting.</p>
       </div>

@@ -75,7 +75,7 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
   // Academies: hand-written regional list plus centres from the national academies list
   const localAcademies = [
     ...(hasRegionalAcademies(id) ? extras.academies : []),
-    ...getAcademiesForRegion(id).map((a) => ({ name: a.name, place: a.city, sports: a.sports, description: a.description, url: a.url, linkLabel: a.type === "Government" ? "Official / reference page" : "Learn more" })),
+    ...getAcademiesForRegion(id).filter((a) => a.level !== "District").map((a) => ({ name: a.name, place: a.city, sports: a.sports, description: a.description, url: a.url, linkLabel: a.type === "Government" ? "Official / reference page" : "Learn more" })),
   ]
   const hasLocalAcademies = localAcademies.length > 0
   const academies = hasLocalAcademies ? localAcademies : extras.academies
@@ -265,7 +265,7 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
       {/* Academies */}
       <section id="academies" className="site-container scroll-mt-32 pt-20">
         <Reveal><SectionHeading
-          eyebrow="Academies"
+          action={{ href: `/academies?state=${id}`, label: "National, state & district centres" }} eyebrow="Academies"
           title={hasLocalAcademies ? "Where champions train" : "Training centres"}
           text={hasLocalAcademies ? `Sports centres, schools and clubs in ${region.name}. Official pages are linked where available.` : `Regional academy listings for ${region.name} haven't been added yet. Use these official national directories meanwhile.`}
         /></Reveal>

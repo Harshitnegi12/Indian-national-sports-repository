@@ -30,6 +30,7 @@ const NAV = [
   { href: "/", label: "Home", hi: "होम" },
   { href: "/athletes", label: "Athletes", hi: "खिलाड़ी" },
   { href: "/sports", label: "Sports", hi: "खेल" },
+  { href: "/academies", label: "Academies", hi: "अकादमियां" },
 
 ]
 

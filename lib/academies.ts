@@ -1,12 +1,16 @@
 import wikiAcademies from "@/lib/data/academies-wiki.json"
 import { INDIA_REGIONS } from "@/lib/india-sports-data"
+import districtMaps from "@/lib/data/district-maps.json"
 
 // Training centres and academies across India, with official or reference links.
 // Government centres link to the Sports Authority of India; others to their own site or a reference page.
 
 export type AcademyType = "Government" | "Private" | "Corporate" | "Services"
 
+export type AcademyLevel = "National" | "State" | "District"
+
 export interface AcademyEntry {
+  level?: AcademyLevel
   name: string
   regionId: string
   city: string
@@ -76,7 +80,29 @@ const stateProgrammes: AcademyEntry[] = INDIA_REGIONS.map((r) => ({
   url: "https://kheloindia.gov.in/",
 }))
 
-export const ACADEMIES: AcademyEntry[] = [...CURATED, ...fromWiki, ...stateProgrammes]
+// District level: every district has a district sports office under the state sports department,
+// which runs coaching at the district stadium, local trials and Khelo India Centres.
+const districtOffices: AcademyEntry[] = Object.entries(districtMaps as Record<string, { districts: { name: string }[] }>).flatMap(([regionId, m]) =>
+  m.districts.map((d) => ({
+    name: `District sports office, ${d.name}`,
+    regionId,
+    city: d.name,
+    sports: ["Multi-sport"],
+    type: "Government" as const,
+    level: "District" as const,
+    description: "Runs coaching at the district stadium, school and district trials, and Khelo India Centres. Visit the district stadium or the state sports department for timings.",
+    url: "https://kheloindia.gov.in/",
+  })),
+)
+
+// National: SAI national institutes and centres, services institutes and national academies
+const NATIONAL = /SAI National Centre|Netaji Subhas National Institute|Lakshmibai National College|Army Sports Institute|National Cricket Academy|Karni Singh/
+function levelOf(a: AcademyEntry): AcademyLevel {
+  if (a.level) return a.level
+  return NATIONAL.test(a.name) ? "National" : "State"
+}
+
+export const ACADEMIES: AcademyEntry[] = [...CURATED, ...fromWiki, ...stateProgrammes.map((a) => ({ ...a, level: "State" as const })), ...districtOffices].map((a) => ({ ...a, level: levelOf(a) }))
 
 export function getAcademiesForRegion(regionId: string) {
   return ACADEMIES.filter((a) => a.regionId === regionId)
