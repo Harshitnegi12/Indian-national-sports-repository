@@ -168,6 +168,7 @@ export function SiteHeader() {
               <kbd className="ml-3 hidden whitespace-nowrap rounded border border-border bg-muted px-1.5 font-mono text-[10px] xl:inline">Ctrl K</kbd>
             </button>
             <LanguageToggle />
+            <ThemeToggle />
             <button
               type="button"
               className="inline-flex size-9 items-center justify-center rounded-lg border border-border bg-card lg:hidden"
