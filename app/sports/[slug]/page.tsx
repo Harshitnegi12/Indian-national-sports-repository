@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { ArrowUpRight, BookOpen, ChevronRight, Flag, ListChecks, MapPin } from "lucide-react"
 import { ATHLETES, SPORT_HINDI, compareAthletes, getSportCategory, getSportCounts, isMedallist } from "@/lib/athlete-data"
 import { getSportInfo } from "@/lib/sports-info"
+import { getAcademiesForSport } from "@/lib/academies"
 import { getRegion, getRegionMeta } from "@/lib/region-meta"
 import { AthleteCard } from "@/components/site/athlete-card"
 import { SectionHeading } from "@/components/site/section-heading"
@@ -134,6 +135,22 @@ export default async function SportPage({ params }: { params: Promise<{ slug: st
         <Stagger className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {top.map((a) => <StaggerItem key={a.id}><AthleteCard athlete={a} showRegion accent={getRegionMeta(getRegion(a.regionId)!).accent} /></StaggerItem>)}
         </Stagger>
+      </section>
+
+      <section className="site-container pt-16">
+        <Reveal><SectionHeading eyebrow="Start training" title={`Want to play ${sport.sport.toLowerCase()}?`} titleHi="खेलना शुरू करना है?" text="Join your district and state association, take part in Khelo India events, and try out at a training centre." action={{ href: "/academies", label: "How to start & all academies" }} /></Reveal>
+        <Stagger className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {getAcademiesForSport(sport.sport).slice(0, 6).map((a) => (
+            <StaggerItem key={a.name}>
+              <a href={a.url} target="_blank" rel="noopener noreferrer" className="group spotlight card-lift flex h-full flex-col rounded-2xl border border-border bg-card p-5">
+                <p className="font-semibold group-hover:text-saffron">{a.name}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{a.city} · {a.type}</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{a.description}</p>
+              </a>
+            </StaggerItem>
+          ))}
+        </Stagger>
+        {info && <p className="mt-4 text-sm text-muted-foreground">Federation: {info.bodies.map((b, i) => <span key={b.url}>{i ? ", " : ""}<a href={b.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-india-green hover:underline">{b.label}</a></span>)}</p>}
       </section>
     </>
   )

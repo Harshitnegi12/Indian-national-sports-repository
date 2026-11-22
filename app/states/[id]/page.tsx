@@ -13,6 +13,7 @@ import {
 } from "@/lib/athlete-data"
 import { REGIONS_SORTED, getAdjacentRegions, getRegion, getRegionMeta, getSameZoneRegions } from "@/lib/region-meta"
 import { getRegionExtras, hasRegionalAcademies } from "@/lib/region-extras"
+import { getAcademiesForRegion } from "@/lib/academies"
 import { RegionSwitcher, type SwitcherRegion } from "@/components/region/region-switcher"
 import { RegionAthletes } from "@/components/region/region-athletes"
 import { TopAndLegends } from "@/components/region/top-legends"
@@ -71,6 +72,13 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
     zone: item.zone,
     count: getAthletesForRegion(item.id).length,
   }))
+  // Academies: hand-written regional list plus centres from the national academies list
+  const localAcademies = [
+    ...(hasRegionalAcademies(id) ? extras.academies : []),
+    ...getAcademiesForRegion(id).map((a) => ({ name: a.name, place: a.city, sports: a.sports, description: a.description, url: a.url, linkLabel: a.type === "Government" ? "Official / reference page" : "Learn more" })),
+  ]
+  const hasLocalAcademies = localAcademies.length > 0
+  const academies = hasLocalAcademies ? localAcademies : extras.academies
   const headline = extras.headline ?? meta.story.tagline
   const intro = extras.introduction ?? meta.story.introduction
   const playerSports = sportCounts.length ? [...sportCounts.map((s) => s.sport), ...SPORT_CATEGORIES.filter((s) => !sportCounts.some((c) => c.sport === s))] : SPORT_CATEGORIES
@@ -144,7 +152,7 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
               [athletes.length, "Athletes listed"],
               [medallists, "Olympic & Para medallists"],
               [sportCounts.length, "Sports"],
-              [hasRegionalAcademies(id) ? extras.academies.length : "–", "Academies"],
+              [hasLocalAcademies ? academies.length : "–", "Academies"],
             ].map(([value, label]) => (
               <StaggerItem key={String(label)}>
                 <div className="h-full rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur transition hover:border-white/25 hover:bg-white/[0.08]">
@@ -258,11 +266,11 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
       <section id="academies" className="site-container scroll-mt-32 pt-20">
         <Reveal><SectionHeading
           eyebrow="Academies"
-          title={hasRegionalAcademies(id) ? "Where champions train" : "Training centres"}
-          text={hasRegionalAcademies(id) ? `Sports centres, schools and clubs in ${region.name}. Official pages are linked where available.` : `Regional academy listings for ${region.name} haven't been added yet. Use these official national directories meanwhile.`}
+          title={hasLocalAcademies ? "Where champions train" : "Training centres"}
+          text={hasLocalAcademies ? `Sports centres, schools and clubs in ${region.name}. Official pages are linked where available.` : `Regional academy listings for ${region.name} haven't been added yet. Use these official national directories meanwhile.`}
         /></Reveal>
         <Stagger className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {extras.academies.map((academy) => (
+          {academies.map((academy) => (
             <StaggerItem key={academy.name}><article className="group spotlight card-lift flex h-full flex-col rounded-2xl border border-border bg-card p-6" style={{ ["--accent-card" as string]: meta.accent }}>
               <div className="flex items-start gap-3">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted transition group-hover:scale-110 group-hover:bg-saffron/15"><Building2 className="size-5 text-foreground/70" /></span>
