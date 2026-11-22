@@ -50,7 +50,7 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
   const extras = getRegionExtras(id)
   const athletes = [...getAthletesForRegion(id)].sort(compareAthletes)
   const sportCounts = getSportCounts(athletes)
-  const athletesWithPlace = athletes.map((athlete) => ({ ...athlete, birthplace: getAthleteProfile(athlete.id)?.birthplace }))
+  const athletesWithPlace = athletes.map((athlete) => { const profile = getAthleteProfile(athlete.id); return { ...athlete, birthplace: [profile?.birthplace, ...(profile?.birthAreas ?? [])].filter(Boolean).join(" · ") } })
   const districtOf: Record<string, string> = {}
   for (const [district, list] of athletesByDistrict(id, athletesWithPlace)) for (const athlete of list) districtOf[athlete.id] = district
   const hasMap = Boolean(getDistrictMap(id)?.districts.length)

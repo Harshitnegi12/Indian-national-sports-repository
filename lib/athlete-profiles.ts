@@ -10,6 +10,8 @@ export interface AthleteProfile {
   born?: string
   birthplace?: string
   gender?: "female" | "male"
+  /** Birthplace and the administrative areas above it (Wikidata P131), used to place athletes on district maps. */
+  birthAreas?: string[]
   image?: { src: string; width: number; height: number; file: string; credit?: string; license?: string; page?: string }
 }
 

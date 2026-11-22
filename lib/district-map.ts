@@ -46,8 +46,9 @@ export function athletesByDistrict(regionId: string, athletes: (AthleteRecord & 
   if (!map) return result
   const patterns = map.districts.map((d) => ({ name: d.name, re: new RegExp("\\b(" + needles(d.name).map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")\\b", "i") }))
   for (const athlete of athletes) {
-    const text = [athlete.hometown, athlete.birthplace, athlete.summary].filter(Boolean).join(" · ")
-    const hit = patterns.find((p) => p.re.test(text))
+    // Prefer the hometown and Wikidata birthplace; fall back to the summary text.
+    const place = [athlete.hometown, athlete.birthplace].filter(Boolean).join(" · ")
+    const hit = (place && patterns.find((p) => p.re.test(place))) || patterns.find((p) => p.re.test(athlete.summary))
     if (hit) {
       if (!result.has(hit.name)) result.set(hit.name, [])
       result.get(hit.name)!.push(athlete)
