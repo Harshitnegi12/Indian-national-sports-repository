@@ -15,7 +15,7 @@ export function SiteFooter() {
           </Link>
           <p className="mt-4 max-w-sm text-sm leading-6 text-muted-foreground">
             A state-by-state directory of Indian athletes, with every profile linked to a public source.
-            An independent community project by Harshit and Vishakha, not an official government service.
+            An independent community project by Harshit, not an official government service.
           </p>
           <nav aria-label="Footer" className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
             <Link href="/states" className="hover:text-saffron">States &amp; UTs</Link>

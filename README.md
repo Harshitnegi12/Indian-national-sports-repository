@@ -4,7 +4,7 @@ A state-by-state directory of Indian athletes from 1947 to today. Every state an
 
 ## Project team
 
-Developed collaboratively by Harshit and Vishakha.
+Developed by Harshit.
 
 ## Features
 
