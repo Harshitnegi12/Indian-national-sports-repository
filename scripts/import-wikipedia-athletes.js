@@ -55,7 +55,7 @@ async function api(params) {
       const res = await fetch(url, { headers: UA })
       if (res.ok) {
         const data = await res.json()
-        if (!data.error) { await sleep(400); return data }
+        if (!data.error) { await sleep(Number(process.env.PAUSE_MS || 150)); return data }
         if (data.error.code !== "maxlag") throw new Error(data.error.info)
       }
     } catch (e) { if (attempt === 9) throw e }
@@ -83,30 +83,55 @@ function sportOf(cat) {
   return null
 }
 
-async function collectRegion(regionId, names, taken) {
+// One request per category returns its sub-categories AND its pages with descriptions and sizes.
+async function categoryContents(title) {
+  const pages = [], subcats = []
+  let cont = {}
+  do {
+    let data
+    try {
+      data = await api({ action: "query", generator: "categorymembers", gcmtitle: title, gcmtype: "page|subcat", gcmlimit: "500", prop: "description|info|pageprops", ppprop: "disambiguation", ...cont })
+    } catch (e) { console.error("skipped " + title); break }
+    for (const p of data.query?.pages || []) (p.ns === 14 ? subcats : pages).push(p)
+    cont = data.continue || null
+  } while (cont)
+  return { pages, subcats }
+}
+
+async function collectRegion(regionId, names) {
   const sportCats = new Map()
-  for (const name of names) {
-    for (const sub of await categoryMembers("Category:Sportspeople from " + name, "subcat")) {
-      const s = sportOf(sub)
-      if (s) sportCats.set(sub, s)
-      else if (/^Category:Sportspeople from /.test(sub)) {
-        // district-level folder: look one level deeper for sport categories
-        for (const deeper of await categoryMembers(sub, "subcat")) { const d = sportOf(deeper); if (d) sportCats.set(deeper, d) }
-      }
+  const queue = names.map((n) => "Category:Sportspeople from " + n)
+  const visitedGeneric = new Set()
+  // Walk "Sportspeople from <state>" and its district folders to find sport categories
+  while (queue.length) {
+    const cat = queue.shift()
+    if (visitedGeneric.has(cat)) continue
+    visitedGeneric.add(cat)
+    const { subcats } = await categoryContents(cat)
+    for (const sub of subcats) {
+      const s = sportOf(sub.title)
+      if (s) sportCats.set(sub.title, s)
+      else if (/^Category:Sportspeople from /.test(sub.title) && visitedGeneric.size < 80) queue.push(sub.title)
     }
   }
-  // Sport categories nested inside the state sport categories (e.g. cities)
-  for (const [cat, s] of [...sportCats]) {
-    for (const sub of await categoryMembers(cat, "subcat")) if (sportOf(sub) && !sportCats.has(sub)) sportCats.set(sub, s)
-  }
   const candidates = new Map()
-  for (const [cat, s] of sportCats) {
-    for (const title of await categoryMembers(cat, "page")) if (!candidates.has(title) && !taken.has(title)) candidates.set(title, s)
+  const seenCats = new Set()
+  const sportQueue = [...sportCats]
+  while (sportQueue.length) {
+    const [cat, s] = sportQueue.shift()
+    if (seenCats.has(cat)) continue
+    seenCats.add(cat)
+    const { pages, subcats } = await categoryContents(cat)
+    for (const sub of subcats) if (sportOf(sub.title) && !seenCats.has(sub.title)) sportQueue.push([sub.title, s])
+    for (const p of pages) if (!candidates.has(p.title)) candidates.set(p.title, { ...s, page: p })
   }
   return candidates
 }
-
 async function buildRecords(regionId, candidates) {
+  for (const [title, c] of [...candidates]) {
+    const p = c.page, desc = p?.description || ""
+    if (!p || p.pageprops?.disambiguation !== undefined || !c.kw.test(desc) || (EXCLUDE_DESC.test(desc) && !/player|athlete|cricketer|footballer|boxer|wrestler|shooter/i.test(desc))) candidates.delete(title)
+  }
   const titles = [...candidates.keys()]
   const info = new Map()
   for (let i = 0; i < titles.length; i += 20) {
@@ -168,7 +193,7 @@ async function main() {
   for (const [regionId, names] of Object.entries(REGIONS).filter(([id]) => !only || only.includes(id))) {
     const file = path.join(dir, regionId + ".json")
     if (fs.existsSync(file)) { console.log(`${regionId}: already done`); continue }
-    const candidates = await collectRegion(regionId, names, new Set())
+    const candidates = await collectRegion(regionId, names)
     const records = await buildRecords(regionId, candidates)
     fs.writeFileSync(file, JSON.stringify(records))
     console.log(`${regionId}: ${candidates.size} pages -> ${records.length} athletes`)
