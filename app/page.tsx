@@ -111,6 +111,27 @@ export default function HomePage() {
       {/* Aaj ka din */}
       <section className="site-container pt-16"><Reveal><TodayInSport /></Reveal></section>
 
+      {/* Quick links */}
+      <section className="site-container pt-10">
+        <Stagger gap={0.04} className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {[
+            { href: "/academies", en: "Academies", hi: "अकादमियां", text: "Where to train" },
+            { href: "/medals", en: "Medal wall", hi: "पदक दीवार", text: "All 41 Olympic medals" },
+            { href: "/rankings", en: "Rankings", hi: "रैंकिंग", text: "Which state leads" },
+            { href: "/timeline", en: "Timeline", hi: "टाइमलाइन", text: "Decade by decade" },
+            { href: "/compare", en: "Compare", hi: "तुलना", text: "Two players side by side" },
+            { href: "/api/random", en: "Random player", hi: "कोई भी खिलाड़ी", text: "Surprise me" },
+          ].map((q) => (
+            <StaggerItem key={q.href}>
+              <Link href={q.href} className="group spotlight card-lift pressable block h-full rounded-2xl border border-border bg-card p-4">
+                <span className="block font-semibold group-hover:text-saffron"><T en={q.en} hi={q.hi} /></span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">{q.text}</span>
+              </Link>
+            </StaggerItem>
+          ))}
+        </Stagger>
+      </section>
+
       {/* Champions */}
       <section className="site-container py-20">
         <Reveal><SectionHeading

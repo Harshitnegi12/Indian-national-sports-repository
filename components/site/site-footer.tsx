@@ -26,6 +26,7 @@ export function SiteFooter() {
             <Link href="/para" className="hover:text-saffron">Para Champions</Link>
             <Link href="/timeline" className="hover:text-saffron">Timeline</Link>
             <Link href="/compare" className="hover:text-saffron">Compare</Link>
+            <Link href="/academies" className="hover:text-saffron">Academies</Link>
             <Link href="/medals" className="hover:text-saffron">Medal wall</Link>
             <Link href="/about" className="hover:text-saffron">About</Link>
             <Link href="/data-notes" className="hover:text-saffron">Data notes &amp; sources</Link>
