@@ -42,9 +42,17 @@ function collectAthletes() {
 async function main() {
   const athletes = [...collectAthletes()]
   console.log("athletes:", athletes.length)
-  const profiles = {}
+  const out = path.join(root, "lib", "data", "athlete-profiles.json")
+  const checkpoint = path.join(root, ".profiles-checkpoint.json")
+  let profiles = {}
   const qids = new Map() // id -> Q
-  for (let i = 0; i < athletes.length; i += 20) {
+  // A checkpoint lets a re-run skip the slow Wikipedia and Commons steps.
+  if (fs.existsSync(checkpoint)) {
+    profiles = JSON.parse(fs.readFileSync(checkpoint, "utf8"))
+    for (const [id, p] of Object.entries(profiles)) if (p.qid) qids.set(id, p.qid)
+    console.log("resumed from checkpoint:", Object.keys(profiles).length)
+  }
+  for (let i = 0; i < athletes.length && !fs.existsSync(checkpoint); i += 20) {
     const chunk = athletes.slice(i, i + 20)
     const params = new URLSearchParams({
       action: "query", format: "json", formatversion: "2", redirects: "1",
@@ -71,13 +79,13 @@ async function main() {
         story,
         image: p.thumbnail ? { src: p.thumbnail.source, width: p.thumbnail.width, height: p.thumbnail.height, file: p.pageimage } : undefined,
       }
-      if (p.pageprops?.wikibase_item) qids.set(id, p.pageprops.wikibase_item)
+      if (p.pageprops?.wikibase_item) { qids.set(id, p.pageprops.wikibase_item); profiles[id].qid = p.pageprops.wikibase_item }
     }
     if (i % 400 === 0) console.log(`wikipedia ${i}/${athletes.length}`)
   }
 
   // Photo credits: author and licence for each image (from Wikimedia Commons metadata)
-  const withImages = Object.values(profiles).filter((p) => p.image?.file)
+  const withImages = Object.values(profiles).filter((p) => p.image?.file && !p.image.credit)
   for (let i = 0; i < withImages.length; i += 50) {
     const chunk = withImages.slice(i, i + 50)
     const params = new URLSearchParams({ action: "query", format: "json", formatversion: "2", prop: "imageinfo", iiprop: "extmetadata", iiextmetadatafilter: "Artist|LicenseShortName|LicenseUrl", titles: chunk.map((p) => "File:" + p.image.file).join("|") })
@@ -96,12 +104,17 @@ async function main() {
     }
   }
 
+  fs.writeFileSync(checkpoint, JSON.stringify(profiles))
+  fs.writeFileSync(out, JSON.stringify(profiles))
+  console.log("saved photos and stories:", Object.keys(profiles).length)
+
   // Wikidata: birth date (P569) and place of birth (P19)
   const entries = [...qids]
   const places = new Map()
   for (let i = 0; i < entries.length; i += 50) {
     const chunk = entries.slice(i, i + 50)
-    const data = await get("https://www.wikidata.org/w/api.php?" + new URLSearchParams({ action: "wbgetentities", format: "json", props: "claims", ids: chunk.map(([, q]) => q).join("|") }))
+    let data
+    try { data = await get("https://www.wikidata.org/w/api.php?" + new URLSearchParams({ action: "wbgetentities", format: "json", props: "claims", ids: chunk.map(([, q]) => q).join("|") })) } catch { continue }
     for (const [id, q] of chunk) {
       const claims = data.entities?.[q]?.claims || {}
       const born = claims.P569?.[0]?.mainsnak?.datavalue?.value?.time
@@ -117,15 +130,16 @@ async function main() {
   const placeIds = [...places.keys()]
   for (let i = 0; i < placeIds.length; i += 50) {
     const chunk = placeIds.slice(i, i + 50)
-    const data = await get("https://www.wikidata.org/w/api.php?" + new URLSearchParams({ action: "wbgetentities", format: "json", props: "labels", languages: "en", ids: chunk.join("|") }))
+    let data
+    try { data = await get("https://www.wikidata.org/w/api.php?" + new URLSearchParams({ action: "wbgetentities", format: "json", props: "labels", languages: "en", ids: chunk.join("|") })) } catch { continue }
     for (const q of chunk) places.set(q, data.entities?.[q]?.labels?.en?.value || null)
   }
   for (const p of Object.values(profiles)) {
     if (p.placeId) { p.birthplace = places.get(p.placeId) || undefined; delete p.placeId }
   }
 
-  const out = path.join(root, "lib", "data", "athlete-profiles.json")
   fs.writeFileSync(out, JSON.stringify(profiles))
+  fs.rmSync(checkpoint, { force: true })
   const withImage = Object.values(profiles).filter((p) => p.image).length
   console.log(`Wrote ${Object.keys(profiles).length} profiles (${withImage} with free photos) to ${out}`)
 }

@@ -11,3 +11,4 @@ coverage/
 Thumbs.db
 
 .wiki-import/
+.profiles-checkpoint.json
