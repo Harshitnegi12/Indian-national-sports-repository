@@ -321,3 +321,16 @@ html.lang-hi .t-hi { display: inline; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* Print / PDF: clean, light, no navigation or interactive controls */
+@media print {
+  header, footer, nav, .no-print, iframe, button, [role="dialog"] { display: none !important; }
+  html, body { background: #fff !important; color: #000 !important; }
+  .hero-surface { background: #fff !important; color: #000 !important; }
+  .hero-surface * { color: #000 !important; }
+  .hero-grid { display: none !important; }
+  section, article, li { break-inside: avoid; }
+  a { text-decoration: none; color: inherit !important; }
+  * { animation: none !important; transition: none !important; box-shadow: none !important; }
+  [style*="opacity: 0"] { opacity: 1 !important; transform: none !important; }
+}

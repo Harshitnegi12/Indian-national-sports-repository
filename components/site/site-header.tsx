@@ -19,6 +19,9 @@ const EXPLORE = [
   { href: "/para", label: "Para Champions", hi: "पैरा चैंपियन", text: "Paralympians and para athletes" },
   { href: "/compare", label: "Compare players", hi: "खिलाड़ियों की तुलना", text: "Two athletes side by side" },
   { href: "/timeline", label: "Timeline & decades", hi: "दशक दर दशक", text: "Heroes of every decade since 1947" },
+  { href: "/medals", label: "Olympic medal wall", hi: "ओलंपिक पदक दीवार", text: "All 41 Indian Olympic medals since 1900" },
+  { href: "/api/random", label: "Random player", hi: "कोई भी खिलाड़ी", text: "Discover a surprise athlete" },
+  { href: "/about", label: "About", hi: "परिचय", text: "Why this project exists and how data is collected" },
   { href: "/data-notes", label: "Data notes", hi: "डेटा और स्रोत", text: "Sources and how we check data" },
 ]
 

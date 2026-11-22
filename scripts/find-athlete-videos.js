@@ -15,6 +15,7 @@ const OFFICIAL = [
   "JioCinema", "JioHotstar", "DD Sports", "Doordarshan Sports", "Khelo India", "SAI Media", "World Table Tennis", "ITTF World",
   "FIDE chess", "Indian Super League", "Indian Football Team", "Commonwealth Sport", "Team India", "Olympic Khel", "IWF",
   "International Weightlifting Federation", "Tennis Channel", "Australian Open TV", "Wimbledon", "Asian Games", "PSA SQUASHTV",
+  "Prime Video India", "Prime Video Sport Australia", "Cricbuzz", "Sky Sports Cricket", "Fox Cricket", "SuperSport", "Willow TV", "Rabbitholebd Sports", "T Sports", "PCB", "Sri Lanka Cricket", "Cricket South Africa", "New Zealand Cricket", "BLACKCAPS", "Windies Cricket", "Sky Sports", "BBC Sport", "Eurosport", "Olympics Khel", "JioCinema Sports", "Sports18", "Star Sports Tamil", "Star Sports Telugu", "Star Sports Hindi", "Hockey India League", "FIH Hockey", "Badminton Asia", "Tennis TV", "ATP Tour", "WTA", "World Aquatics", "World Boxing Council",
   "ESPNcricinfo", "ESPN India", "ESPN", "Sportstar", "Sports Tak", "PTI", "Press Trust of India", "ANI News", "NDTV", "NDTV Sports", "India Today", "Aaj Tak", "Times Now", "Hindustan Times", "The Indian Express", "The Hindu", "WION", "DD News", "Olympic Channel", "Star Sports India", "Sony LIV", "FanCode", "Hotstar", "Disney+ Hotstar", "BCCI TV", "England & Wales Cricket Board", "cricket.com.au", "Asian Football Confederation", "the-AFC", "Indian Football Team", "FIFA",
   "Sansad TV", "Prasar Bharati Archives", "DD National", "Doordarshan National", "All India Football Federation", "Indian Super League - ISL", "Kerala Blasters FC", "Bengaluru FC", "Mohun Bagan Super Giant", "East Bengal FC", "Mumbai Indians", "Chennai Super Kings", "Royal Challengers Bengaluru", "Kolkata Knight Riders", "Rajasthan Royals", "Delhi Capitals", "Punjab Kings", "Sunrisers Hyderabad", "Gujarat Titans", "Lucknow Super Giants", "IndianPremierLeague", "Wisden India", "Paralympics", "World Para Athletics", "Hockey India League", "Chess.com", "chess24", "Commonwealth Games", "Pro Kabaddi League",
 ]
@@ -56,39 +57,47 @@ function parseResults(html) {
   return out
 }
 
+async function searchOne(name, sport) {
+  const q = `${name} ${sport.split("·")[0].trim()} highlights`
+  const res = await fetch("https://www.youtube.com/results?hl=en&gl=IN&search_query=" + encodeURIComponent(q), { headers: { "User-Agent": "Mozilla/5.0", "Accept-Language": "en" } })
+  const html = await res.text()
+  // Every part of the name (ignoring initials) must appear in the title, so a common surname alone never matches.
+  const parts = name.toLowerCase().replace(/\./g, " ").split(/\s+/).filter((w) => w.length > 2)
+  const candidates = parseResults(html).filter((v) => isOfficial(v.channel) && parts.every((w) => v.title.toLowerCase().includes(w))).slice(0, 4)
+  const verified = []
+  for (const v of candidates) {
+    const o = await fetch("https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent("https://www.youtube.com/watch?v=" + v.id))
+    if (!o.ok) continue
+    const meta = await o.json()
+    if (isOfficial(meta.author_name)) verified.push({ id: v.id, title: meta.title, channel: meta.author_name })
+    if (verified.length === 2) break
+  }
+  return verified
+}
+
 async function main() {
   const athletes = topAthletes()
-  console.log("athletes to search:", athletes.length)
   const outFile = path.join(root, "lib", "data", "athlete-videos.json")
   const result = fs.existsSync(outFile) ? JSON.parse(fs.readFileSync(outFile, "utf8")) : {}
+  const queue = athletes.filter(([id]) => !result[id])
+  console.log("athletes to search:", queue.length)
   let done = 0
-  const tried = new Set()
-  for (const [id, { name, sport }] of athletes) {
-    if (result[id] || tried.has(id)) continue
-    tried.add(id)
-    if (++done % 100 === 0) fs.writeFileSync(outFile, JSON.stringify(result, null, 1))
-    const q = `${name} ${sport.split("·")[0].trim()} highlights`
-    try {
-      const res = await fetch("https://www.youtube.com/results?hl=en&gl=IN&search_query=" + encodeURIComponent(q), { headers: { "User-Agent": "Mozilla/5.0", "Accept-Language": "en" } })
-      const html = await res.text()
-      // Every part of the name (ignoring initials) must appear in the title, so a common surname alone never matches.
-      const parts = name.toLowerCase().replace(/\./g, " ").split(/\s+/).filter((w) => w.length > 2)
-      const candidates = parseResults(html).filter((v) => isOfficial(v.channel) && parts.every((w) => v.title.toLowerCase().includes(w))).slice(0, 4)
-      const verified = []
-      for (const v of candidates) {
-        const o = await fetch("https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent("https://www.youtube.com/watch?v=" + v.id))
-        if (!o.ok) continue
-        const meta = await o.json()
-        if (isOfficial(meta.author_name)) verified.push({ id: v.id, title: meta.title, channel: meta.author_name })
-        if (verified.length === 2) break
+  // Several workers in parallel; the result file is saved every 100 athletes so progress is never lost.
+  const WORKERS = Number(process.env.WORKERS || 3)
+  async function worker() {
+    while (queue.length) {
+      const [id, { name, sport }] = queue.shift()
+      try {
+        const verified = await searchOne(name, sport)
+        if (verified.length) { result[id] = verified; console.log(`${name}: ${verified.length}`) }
+      } catch (e) {
+        console.log(`${name}: error ${e.message}`)
       }
-      if (verified.length) result[id] = verified
-      if (verified.length) console.log(`${name}: ${verified.length}`)
-    } catch (e) {
-      console.log(`${name}: error ${e.message}`)
+      if (++done % 100 === 0) { fs.writeFileSync(outFile, JSON.stringify(result, null, 1)); console.log(`progress ${done}, with videos ${Object.keys(result).length}`) }
+      await sleep(400)
     }
-    await sleep(1200)
   }
+  await Promise.all(Array.from({ length: WORKERS }, worker))
   fs.writeFileSync(outFile, JSON.stringify(result, null, 1))
   console.log("athletes with videos:", Object.keys(result).length)
 }

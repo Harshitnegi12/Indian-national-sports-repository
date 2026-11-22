@@ -21,6 +21,8 @@ import { Reveal } from "@/components/motion/motion-primitives"
 import { ShareActions } from "@/components/athlete/share-actions"
 import { SocialLinks } from "@/components/athlete/social-links"
 import { AwardsSection, CareerJobSection } from "@/components/athlete/honours"
+import { JourneyTimeline } from "@/components/athlete/journey"
+import { PrintButton } from "@/components/athlete/print-button"
 import { ReportError } from "@/components/site/report-error"
 import { DATA_UPDATED } from "@/lib/site-config"
 
@@ -121,7 +123,7 @@ export default async function AthletePage({ params }: { params: Promise<{ slug: 
               </div>
               <p className="mt-5 max-w-3xl text-lg leading-8 text-hero-muted">{athlete.summary}</p>
               <SocialLinks id={athlete.id} name={athlete.name} />
-              <ShareActions id={athlete.id} name={athlete.name} />
+              <div className="no-print flex flex-wrap items-end gap-2"><ShareActions id={athlete.id} name={athlete.name} /><PrintButton /></div>
             </Reveal>
           </div>
         </div>
@@ -163,6 +165,7 @@ export default async function AthletePage({ params }: { params: Promise<{ slug: 
             </section>
           </Reveal>
 
+          <Reveal><JourneyTimeline athlete={athlete} /></Reveal>
           <Reveal><AwardsSection id={athlete.id} /></Reveal>
 
           {/* Videos */}
