@@ -44,7 +44,7 @@ export function CollectionPage({ eyebrow, title, hindi, intro, athletes, champio
             <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
               <NationalAthleteDirectory
                 accents={accents}
-                athletes={sorted.map(({ id, name, regionId, sport, hometown, tier, photo, highlights }) => ({ id, name, regionId, sport, hometown, tier, photo, highlights: highlights.slice(0, 1), summary: "", sources: [] }))}
+                athletes={sorted.map(({ id, name, regionId, sport, hometown, tier, photo, bornYear, highlights }) => ({ id, name, regionId, sport, hometown, tier, photo, bornYear, highlights: highlights.slice(0, 1), summary: "", sources: [] }))}
               />
             </Suspense>
           </div>

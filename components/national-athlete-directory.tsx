@@ -15,9 +15,10 @@ export function NationalAthleteDirectory({ athletes: ATHLETES, accents }: { athl
   const [sport, setSport] = React.useState(params.get("sport") ?? "all")
   const [region, setRegion] = React.useState(params.get("region") ?? "all")
   const [medalOnly, setMedalOnly] = React.useState(false)
+  const [era, setEra] = React.useState(params.get("era") ?? "all")
   const [sort, setSort] = React.useState<"achievement" | "name">("achievement")
   const [limit, setLimit] = React.useState(48)
-  React.useEffect(() => setLimit(48), [query, sport, region, medalOnly, sort])
+  React.useEffect(() => setLimit(48), [query, sport, region, medalOnly, sort, era])
 
   const sports = React.useMemo(() => Array.from(new Set(ATHLETES.map((athlete) => getSportCategory(athlete)))).sort(), [ATHLETES])
 
@@ -26,15 +27,17 @@ export function NationalAthleteDirectory({ athletes: ATHLETES, accents }: { athl
     return ATHLETES.filter((athlete) => sport === "all" || getSportCategory(athlete) === sport)
       .filter((athlete) => region === "all" || athlete.regionId === region)
       .filter((athlete) => !medalOnly || isMedallist(athlete))
+      // Era = the decade an athlete turned 25, roughly their peak years
+      .filter((athlete) => era === "all" || (athlete.bornYear !== undefined && Math.floor((athlete.bornYear + 25) / 10) * 10 === Number(era)))
       .filter((athlete) => !q || [athlete.name, athlete.sport, athlete.hometown ?? "", getRegionName(athlete.regionId)].join(" ").toLowerCase().includes(q))
       .sort(sort === "name" ? (a, b) => a.name.localeCompare(b.name) : compareAthletes)
-  }, [ATHLETES, query, sport, region, medalOnly, sort])
+  }, [ATHLETES, query, sport, region, medalOnly, sort, era])
 
   const select = "h-11 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-ring"
 
   return (
     <div>
-      <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 sm:p-5 md:grid-cols-[1.5fr_1fr_1fr_auto]">
+      <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 sm:p-5 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr_auto]">
         <label className="relative">
           <span className="sr-only">Search athletes</span>
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -48,6 +51,10 @@ export function NationalAthleteDirectory({ athletes: ATHLETES, accents }: { athl
         <select aria-label="State or UT" value={region} onChange={(event) => setRegion(event.target.value)} className={select}>
           <option value="all">All states &amp; UTs</option>
           {REGIONS_SORTED.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+        </select>
+        <select aria-label="Era" value={era} onChange={(event) => setEra(event.target.value)} className={select}>
+          <option value="all">All eras</option>
+          {[2020, 2010, 2000, 1990, 1980, 1970, 1960, 1950, 1940].map((d) => <option key={d} value={d}>{d}s</option>)}
         </select>
         <label className="flex h-11 items-center gap-2 rounded-lg border border-input bg-background px-3 text-sm">
           <input type="checkbox" checked={medalOnly} onChange={(event) => setMedalOnly(event.target.checked)} className="size-4 accent-[var(--saffron)]" />
@@ -95,7 +102,7 @@ export function NationalAthleteDirectory({ athletes: ATHLETES, accents }: { athl
       ) : (
         <div className="mt-6 rounded-2xl border border-dashed border-border bg-card p-10 text-center">
           <p className="font-semibold">No athletes match these filters.</p>
-          <button type="button" onClick={() => { setQuery(""); setSport("all"); setRegion("all"); setMedalOnly(false) }} className="mt-3 text-sm font-semibold text-saffron hover:underline">Clear filters</button>
+          <button type="button" onClick={() => { setQuery(""); setSport("all"); setRegion("all"); setMedalOnly(false); setEra("all") }} className="mt-3 text-sm font-semibold text-saffron hover:underline">Clear filters</button>
         </div>
       )}
     </div>

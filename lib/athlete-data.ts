@@ -35,6 +35,8 @@ export interface AthleteRecord {
   photo?: string
   /** From Wikidata (P21), used by the Women in Sports section. */
   gender?: "female" | "male"
+  /** Year of birth (Wikidata), used for era filters and legends. */
+  bornYear?: number
   /** Only used by enrichment maps: appended to highlights / sources. */
   extraHighlights?: string[]
   extraSources?: AthleteSource[]
@@ -535,7 +537,7 @@ export const ATHLETES: AthleteRecord[] = [...BASE_ATHLETES, ...HARYANA_ATHLETES,
     return true
   })
   .map(enrich)
-  .map((athlete) => ({ ...athlete, tier: getAthleteTier(athlete), photo: getAthleteProfile(athlete.id)?.image?.src, gender: getAthleteProfile(athlete.id)?.gender }))
+  .map((athlete) => ({ ...athlete, tier: getAthleteTier(athlete), photo: getAthleteProfile(athlete.id)?.image?.src, gender: getAthleteProfile(athlete.id)?.gender, bornYear: Number(getAthleteProfile(athlete.id)?.born?.slice(0, 4)) || undefined }))
 
 export * from "@/lib/athlete-utils"
 import { getSportSlug } from "@/lib/athlete-utils"

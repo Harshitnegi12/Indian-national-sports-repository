@@ -15,6 +15,7 @@ import { REGIONS_SORTED, getAdjacentRegions, getRegion, getRegionMeta, getSameZo
 import { getRegionExtras, hasRegionalAcademies } from "@/lib/region-extras"
 import { RegionSwitcher, type SwitcherRegion } from "@/components/region/region-switcher"
 import { RegionAthletes } from "@/components/region/region-athletes"
+import { TopAndLegends } from "@/components/region/top-legends"
 import { PlayerCorner } from "@/components/region/player-corner"
 import { AthleteAvatar, TierBadge } from "@/components/site/athlete-card"
 import { SectionHeading } from "@/components/site/section-heading"
@@ -54,7 +55,12 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
   const districtOf: Record<string, string> = {}
   for (const [district, list] of athletesByDistrict(id, athletesWithPlace)) for (const athlete of list) districtOf[athlete.id] = district
   const hasMap = Boolean(getDistrictMap(id)?.districts.length)
-  const champions = athletes.filter((athlete) => athlete.featured || isMedallist(athlete)).slice(0, 6)
+  // Top 10: athletes born from 1982 on (today's stars). Legends: born before 1975. Both ranked by achievement.
+  const byStanding = (a: (typeof athletes)[number], b: (typeof athletes)[number]) => compareAthletes(a, b) || Number(Boolean(b.photo)) - Number(Boolean(a.photo))
+  let topTen = athletes.filter((a) => (a.bornYear ?? 0) >= 1982).sort(byStanding).slice(0, 10)
+  const legends = athletes.filter((a) => a.bornYear && a.bornYear < 1975).sort(byStanding).slice(0, 10)
+  if (!topTen.length && !legends.length) topTen = athletes.slice(0, 10)
+  const champions = [...topTen, ...legends]
   const medallists = athletes.filter(isMedallist).length
   const { previous, next } = getAdjacentRegions(id)
   const sameZone = getSameZoneRegions(id)
@@ -158,31 +164,13 @@ export default async function RegionPage({ params }: { params: Promise<{ id: str
 
       <SectionNav sections={sections} accent={meta.accent} />
 
-      {/* Champions */}
-      {champions.length > 0 && (
+      {/* Top 10 and Legends */}
+      {(topTen.length > 0 || legends.length > 0) && (
         <section id="champions" className="site-container scroll-mt-32 pt-16">
-          <Reveal><SectionHeading eyebrow="Champions" title={`Pride of ${region.name}`} text="Medallists and headline athletes from this region." /></Reveal>
-          <Stagger className="snap-rail no-scrollbar -mx-4 mt-8 flex gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 lg:grid-cols-3">
-            {champions.map((athlete) => (
-              <StaggerItem key={athlete.id} className="w-[82%] shrink-0 sm:w-[60%] md:w-auto">
-              <Link href={"/athletes/" + athlete.id} className="group spotlight card-lift pressable relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-6" style={{ ["--accent-card" as string]: meta.accent }}>
-                <div className="absolute inset-y-0 left-0 w-1 transition-all duration-300 group-hover:w-1.5" style={{ background: meta.accent }} />
-                <div className="flex items-center gap-4">
-                  <AthleteAvatar name={athlete.name} accent={meta.accent} size="lg" photo={athlete.photo} />
-                  <div className="min-w-0">
-                    <p className="truncate font-display text-xl font-bold group-hover:text-saffron">{athlete.name}</p>
-                    <p className="truncate text-sm text-muted-foreground">{athlete.sport}</p>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm leading-6 text-foreground/85">{athlete.highlights[0]}</p>
-                <div className="mt-auto flex items-center justify-between pt-4">
-                  <TierBadge tier={athlete.tier} />
-                  {athlete.hometown && <span className="truncate pl-3 text-xs text-muted-foreground">{athlete.hometown}</span>}
-                </div>
-              </Link>
-              </StaggerItem>
-            ))}
-          </Stagger>
+          <Reveal><SectionHeading eyebrow="Champions" title={`Pride of ${region.name}`} titleHi={`${meta.hindi} का गौरव`} /></Reveal>
+          <Reveal className="mt-6">
+            <TopAndLegends top={topTen} legends={legends} accent={meta.accent} regionName={region.name} />
+          </Reveal>
         </section>
       )}
 

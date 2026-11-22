@@ -80,10 +80,10 @@ export default function HomePage() {
             <Reveal delay={0.55}>
               <dl className="mt-10 grid max-w-xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-4">
                 {[
-                  [36, "States & UTs", "राज्य व केंद्र शासित"],
                   [ATHLETES.length, "Athletes", "खिलाड़ी"],
+                  [36, "States & UTs", "राज्य व केंद्र शासित"],
                   [sportCounts.length, "Sports", "खेल"],
-                  [medallists, "Olympic & Para medallists", "ओलंपिक व पैरा पदक विजेता"],
+                  [new Date().getFullYear() - 1947, "Years of sport since 1947", "1947 से साल"],
                 ].map(([value, label, hi]) => (
                   <div key={label} className="bg-hero/80 px-4 py-4 transition-colors hover:bg-hero/60">
                     <dt className="text-xs text-hero-muted"><T en={label} hi={hi} /></dt>

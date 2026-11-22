@@ -15,6 +15,7 @@ const OFFICIAL = [
   "JioCinema", "JioHotstar", "DD Sports", "Doordarshan Sports", "Khelo India", "SAI Media", "World Table Tennis", "ITTF World",
   "FIDE chess", "Indian Super League", "Indian Football Team", "Commonwealth Sport", "Team India", "Olympic Khel", "IWF",
   "International Weightlifting Federation", "Tennis Channel", "Australian Open TV", "Wimbledon", "Asian Games", "PSA SQUASHTV",
+  "Sansad TV", "Prasar Bharati Archives", "DD National", "Doordarshan National", "All India Football Federation", "Indian Super League - ISL", "Kerala Blasters FC", "Bengaluru FC", "Mohun Bagan Super Giant", "East Bengal FC", "Mumbai Indians", "Chennai Super Kings", "Royal Challengers Bengaluru", "Kolkata Knight Riders", "Rajasthan Royals", "Delhi Capitals", "Punjab Kings", "Sunrisers Hyderabad", "Gujarat Titans", "Lucknow Super Giants", "IndianPremierLeague", "Wisden India", "Paralympics", "World Para Athletics", "Hockey India League", "Chess.com", "chess24", "Commonwealth Games", "Pro Kabaddi League",
 ]
 const isOfficial = (channel) => OFFICIAL.some((o) => channel.toLowerCase() === o.toLowerCase())
 
@@ -25,6 +26,11 @@ function topAthletes() {
   for (const m of read("lib/data/haryana.ts").matchAll(/id: "([^"]+)", name: "([^"]+)", sport: "([^"]+)"[^\n]*tier: "(olympic-medal|paralympic-medal|world-champion)"/g)) list.set(m[1], { name: m[2], sport: m[3] })
   for (const f of fs.readdirSync(path.join(root, "lib/data")).filter((f) => /^athletes-batch-\d+\.ts$/.test(f))) {
     for (const m of read("lib/data/" + f).matchAll(/\["([^"]+)", "[a-z-]+", "([^"]+)", "[^"]*", "[^"]+", "([OPW])"/g)) list.set(slugify(m[1]), { name: m[1], sport: m[2] })
+  }
+  // Imported athletes who competed internationally
+  for (const row of JSON.parse(read("lib/data/athletes-wiki.json"))) {
+    const id = slugify(row.name)
+    if (!list.has(id) && row.tier !== "national") list.set(id, { name: row.name, sport: row.sport })
   }
   return [...list]
 }
@@ -50,8 +56,12 @@ function parseResults(html) {
 async function main() {
   const athletes = topAthletes()
   console.log("athletes to search:", athletes.length)
-  const result = {}
+  const outFile = path.join(root, "lib", "data", "athlete-videos.json")
+  const result = fs.existsSync(outFile) ? JSON.parse(fs.readFileSync(outFile, "utf8")) : {}
+  let done = 0
   for (const [id, { name, sport }] of athletes) {
+    if (result[id]) continue
+    if (++done % 100 === 0) fs.writeFileSync(outFile, JSON.stringify(result, null, 1))
     const q = `${name} ${sport.split("·")[0].trim()} highlights`
     try {
       const res = await fetch("https://www.youtube.com/results?hl=en&gl=IN&search_query=" + encodeURIComponent(q), { headers: { "User-Agent": "Mozilla/5.0", "Accept-Language": "en" } })
@@ -67,13 +77,13 @@ async function main() {
         if (verified.length === 2) break
       }
       if (verified.length) result[id] = verified
-      console.log(`${name}: ${verified.length}`)
+      if (verified.length) console.log(`${name}: ${verified.length}`)
     } catch (e) {
       console.log(`${name}: error ${e.message}`)
     }
     await sleep(1200)
   }
-  fs.writeFileSync(path.join(root, "lib", "data", "athlete-videos.json"), JSON.stringify(result, null, 1))
+  fs.writeFileSync(outFile, JSON.stringify(result, null, 1))
   console.log("athletes with videos:", Object.keys(result).length)
 }
 main()

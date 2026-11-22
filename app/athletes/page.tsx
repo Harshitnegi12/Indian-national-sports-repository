@@ -20,7 +20,7 @@ export default function AthletesDirectoryPage() {
       />
       <div className="site-container py-10">
         <Suspense fallback={<p className="text-sm text-muted-foreground">Loading athletes…</p>}>
-          <NationalAthleteDirectory accents={accents} athletes={ATHLETES.map(({ id, name, regionId, sport, hometown, tier, photo, highlights }) => ({ id, name, regionId, sport, hometown, tier, photo, highlights: highlights.slice(0, 1), summary: "", sources: [] }))} />
+          <NationalAthleteDirectory accents={accents} athletes={ATHLETES.map(({ id, name, regionId, sport, hometown, tier, photo, bornYear, highlights }) => ({ id, name, regionId, sport, hometown, tier, photo, bornYear, highlights: highlights.slice(0, 1), summary: "", sources: [] }))} />
         </Suspense>
       </div>
     </>

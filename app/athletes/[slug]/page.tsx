@@ -19,6 +19,8 @@ import { AthleteAvatar, AthleteCard, TierBadge } from "@/components/site/athlete
 import { LiteYouTube } from "@/components/athlete/lite-youtube"
 import { Reveal } from "@/components/motion/motion-primitives"
 import { ShareActions } from "@/components/athlete/share-actions"
+import { SocialLinks } from "@/components/athlete/social-links"
+import { AwardsSection, CareerJobSection } from "@/components/athlete/honours"
 import { ReportError } from "@/components/site/report-error"
 import { DATA_UPDATED } from "@/lib/site-config"
 
@@ -118,6 +120,7 @@ export default async function AthletePage({ params }: { params: Promise<{ slug: 
                 {born && <span className="inline-flex items-center gap-1.5"><Cake className="size-4" /> Born {born}</span>}
               </div>
               <p className="mt-5 max-w-3xl text-lg leading-8 text-hero-muted">{athlete.summary}</p>
+              <SocialLinks id={athlete.id} name={athlete.name} />
               <ShareActions id={athlete.id} name={athlete.name} />
             </Reveal>
           </div>
@@ -160,6 +163,8 @@ export default async function AthletePage({ params }: { params: Promise<{ slug: 
             </section>
           </Reveal>
 
+          <Reveal><AwardsSection id={athlete.id} /></Reveal>
+
           {/* Videos */}
           <Reveal>
             <section className="rounded-2xl border border-border bg-card p-6 sm:p-8">
@@ -187,6 +192,7 @@ export default async function AthletePage({ params }: { params: Promise<{ slug: 
         </div>
 
         <aside className="space-y-6">
+          <Reveal><CareerJobSection id={athlete.id} /></Reveal>
           <Reveal>
             <section className="rounded-2xl border border-border bg-card p-6">
               <h2 className="text-lg font-bold">Profile</h2>
