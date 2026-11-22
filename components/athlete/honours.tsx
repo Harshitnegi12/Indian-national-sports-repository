@@ -1,5 +1,14 @@
 import { Award, BriefcaseBusiness } from "lucide-react"
 import honours from "@/lib/data/athlete-honours.json"
+import { getAthleteProfile } from "@/lib/athlete-profiles"
+
+const JOB = /\b(Indian Army|Indian Navy|Indian Air Force|Indian Railways|Railways|ONGC|Indian Oil|Air India|Bharat Petroleum|BPCL|Police|Subedar|Havildar|Junior Commissioned Officer|Deputy Superintendent of Police|DSP|CISF|CRPF|BSF|ITBP|Income Tax|Services Sports Control Board)\b/
+
+/** The sentence of the Wikipedia biography that mentions the athlete's job or service rank, if any. */
+function jobSentence(id: string) {
+  const story = getAthleteProfile(id)?.story ?? ""
+  return story.split(/(?<=[.!?])\s+/).find((s) => JOB.test(s) && /\b(appointed|employed|serves|served|works|worked|joined|job|post|rank|officer|promoted)\b/i.test(s))
+}
 
 // Awards, employers and military rank from Wikidata (scripts/fetch-athlete-socials.js).
 
@@ -32,15 +41,17 @@ export function AwardsSection({ id }: { id: string }) {
 
 export function CareerJobSection({ id }: { id: string }) {
   const h = getAthleteHonours(id)
-  if (!h?.employers?.length && !h?.rank?.length) return null
+  const sentence = jobSentence(id)
+  if (!h?.employers?.length && !h?.rank?.length && !sentence) return null
   return (
     <section className="rounded-2xl border border-border bg-card p-6">
       <h2 className="flex items-center gap-2 text-lg font-bold"><BriefcaseBusiness className="size-5" /> Job &amp; rank</h2>
+      {sentence && <blockquote className="mt-3 rounded-xl bg-muted/60 p-3 text-sm leading-6">{sentence}<span className="mt-1 block text-xs text-muted-foreground">From the Wikipedia biography</span></blockquote>}
       <dl className="mt-3 divide-y divide-border text-sm">
-        {h.rank?.map((r) => (
+        {h?.rank?.map((r) => (
           <div key={r} className="flex gap-3 py-2.5"><dt className="w-24 shrink-0 text-muted-foreground">Rank</dt><dd className="font-medium">{r}</dd></div>
         ))}
-        {h.employers?.map((e) => (
+        {h?.employers?.map((e) => (
           <div key={e.name} className="flex gap-3 py-2.5"><dt className="w-24 shrink-0 text-muted-foreground">Employer</dt><dd className="font-medium">{e.name}{e.from ? <span className="text-muted-foreground"> · since {e.from}</span> : null}</dd></div>
         ))}
       </dl>
